@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChapterConfig } from '../types';
-import { FileText, Lock, ChevronRight, Play } from 'lucide-react';
+import { FileText, Lock, ChevronDown, ChevronRight, Calendar } from 'lucide-react';
 
 export const MainMenu: React.FC<{
   onNewGame: () => void;
@@ -42,7 +42,7 @@ export const MainMenu: React.FC<{
       </div>
 
       <div className="mt-12 text-xs text-stone-700 font-mono">
-        v1.0.4 // UNAUTHORIZED ACCESS PROHIBITED
+        v1.0.5 // UNAUTHORIZED ACCESS PROHIBITED
       </div>
     </div>
   </div>
@@ -51,60 +51,107 @@ export const MainMenu: React.FC<{
 export const ChapterSelect: React.FC<{
   chapters: ChapterConfig[];
   maxChapterReached: number;
-  onSelectChapter: (chapter: ChapterConfig) => void;
+  maxDayReached: number;
+  onSelectDay: (dayIndex: number) => void;
   onBack: () => void;
-}> = ({ chapters, maxChapterReached, onSelectChapter, onBack }) => (
-  <div className="w-full h-full bg-[#1c1917] text-stone-200 p-12 overflow-y-auto">
-    <div className="max-w-4xl mx-auto">
-      <button onClick={onBack} className="text-stone-500 hover:text-white mb-8 text-xs uppercase tracking-widest flex items-center gap-1">
-        &larr; Back to Terminal
-      </button>
-      
-      <h2 className="text-4xl font-bold uppercase tracking-tighter mb-12 border-b border-stone-700 pb-4 text-amber-500">
-        Case Files
-      </h2>
+}> = ({ chapters, maxChapterReached, maxDayReached, onSelectDay, onBack }) => {
+  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
 
-      <div className="grid grid-cols-1 gap-6">
-        {chapters.map((chap) => {
-           const isLocked = chap.number > maxChapterReached;
-           return (
-             <button
-               key={chap.id}
-               disabled={isLocked}
-               onClick={() => onSelectChapter(chap)}
-               className={`relative p-8 border border-stone-700 bg-stone-800 text-left transition-all duration-300 group
-                 ${isLocked ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:border-amber-500 hover:bg-stone-700'}
-               `}
-             >
-               <div className="flex justify-between items-start">
-                 <div>
-                   <span className="text-xs font-bold uppercase tracking-[0.2em] text-stone-500 block mb-2">
-                     Chapter 0{chap.number}
-                   </span>
-                   <h3 className={`text-3xl font-black uppercase mb-4 ${isLocked ? 'text-stone-600' : 'text-stone-200 group-hover:text-amber-500'}`}>
-                     {chap.title}
-                   </h3>
-                   <p className="text-sm font-typewriter text-stone-400 max-w-xl leading-relaxed">
-                     {isLocked ? "ACCESS DENIED. CLEARANCE LEVEL INSUFFICIENT." : chap.description}
-                   </p>
-                 </div>
-                 <div className="text-4xl">
-                   {isLocked ? <Lock className="text-stone-600" /> : <FileText className="text-stone-600 group-hover:text-amber-500" />}
-                 </div>
+  const toggleChapter = (chapId: string) => {
+    if (expandedChapter === chapId) {
+      setExpandedChapter(null);
+    } else {
+      setExpandedChapter(chapId);
+    }
+  };
+
+  return (
+    <div className="w-full h-full bg-[#1c1917] text-stone-200 p-12 overflow-y-auto">
+      <div className="max-w-4xl mx-auto">
+        <button onClick={onBack} className="text-stone-500 hover:text-white mb-8 text-xs uppercase tracking-widest flex items-center gap-1">
+          &larr; Back to Terminal
+        </button>
+        
+        <h2 className="text-4xl font-bold uppercase tracking-tighter mb-12 border-b border-stone-700 pb-4 text-amber-500">
+          Case Files
+        </h2>
+
+        <div className="grid grid-cols-1 gap-6">
+          {chapters.map((chap) => {
+             const isLocked = chap.number > maxChapterReached;
+             const isExpanded = expandedChapter === chap.id;
+             
+             // Calculate days in this chapter
+             const daysInChapter = [];
+             for (let i = chap.startDayIndex; i <= chap.endDayIndex; i++) {
+               daysInChapter.push(i);
+             }
+
+             return (
+               <div key={chap.id} className={`border border-stone-700 bg-stone-800 transition-all duration-300 ${isLocked ? 'opacity-50 grayscale' : 'hover:border-amber-500'}`}>
+                 <button
+                   disabled={isLocked}
+                   onClick={() => toggleChapter(chap.id)}
+                   className={`w-full p-8 text-left flex justify-between items-start group ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                 >
+                   <div>
+                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-stone-500 block mb-2">
+                       Chapter 0{chap.number}
+                     </span>
+                     <h3 className={`text-3xl font-black uppercase mb-4 ${isLocked ? 'text-stone-600' : 'text-stone-200 group-hover:text-amber-500'}`}>
+                       {chap.title}
+                     </h3>
+                     <p className="text-sm font-typewriter text-stone-400 max-w-xl leading-relaxed">
+                       {isLocked ? "ACCESS DENIED. CLEARANCE LEVEL INSUFFICIENT." : chap.description}
+                     </p>
+                   </div>
+                   <div className="text-4xl flex flex-col items-center gap-4">
+                     {isLocked ? <Lock className="text-stone-600" /> : <FileText className="text-stone-600 group-hover:text-amber-500" />}
+                     {!isLocked && (
+                        isExpanded ? <ChevronDown className="w-6 h-6 text-amber-500" /> : <ChevronRight className="w-6 h-6 text-stone-600" />
+                     )}
+                   </div>
+                 </button>
+
+                 {/* Day Selection Grid */}
+                 {!isLocked && isExpanded && (
+                    <div className="p-8 pt-0 border-t border-stone-700 bg-stone-900/50 animate-slide-up">
+                       <h4 className="text-xs font-bold uppercase tracking-widest text-stone-500 mb-4 flex items-center gap-2">
+                         <Calendar className="w-4 h-4"/> Select Shift
+                       </h4>
+                       <div className="grid grid-cols-5 gap-4">
+                          {daysInChapter.map((dayIdx) => {
+                             const isDayLocked = dayIdx > maxDayReached;
+                             return (
+                               <button
+                                 key={dayIdx}
+                                 disabled={isDayLocked}
+                                 onClick={() => onSelectDay(dayIdx)}
+                                 className={`p-4 flex flex-col items-center gap-2 transition-colors group border
+                                   ${isDayLocked 
+                                     ? 'bg-stone-900 border-stone-800 text-stone-700 cursor-not-allowed' 
+                                     : 'bg-stone-800 border-stone-600 hover:bg-amber-600 hover:text-white hover:border-amber-500 cursor-pointer'
+                                   }
+                                 `}
+                               >
+                                  <span className={`text-2xl font-bold font-typewriter ${!isDayLocked && 'group-hover:scale-110 transition-transform'}`}>
+                                    {isDayLocked ? <Lock className="w-4 h-4 opacity-30" /> : dayIdx + 1}
+                                  </span>
+                                  <span className="text-[10px] uppercase opacity-50">Day</span>
+                               </button>
+                             );
+                          })}
+                       </div>
+                    </div>
+                 )}
                </div>
-               
-               {!isLocked && (
-                 <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-amber-500 text-xs font-bold uppercase tracking-widest">
-                   Open File <ChevronRight className="w-4 h-4" />
-                 </div>
-               )}
-             </button>
-           );
-        })}
+             );
+          })}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const ChapterIntro: React.FC<{
   chapter: ChapterConfig;

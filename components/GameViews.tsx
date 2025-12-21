@@ -1,52 +1,113 @@
 
 import React from 'react';
 import { DayConfig, GameState, AuditLogEntry, UpgradeType } from '../types';
-import { FileText, ShieldAlert, CheckCircle, Newspaper, Highlighter, PenLine, AlertOctagon, DollarSign, XCircle, AlertTriangle, Skull, Handshake, Flame, ShoppingCart, Coffee, Scan, Sun, Stamp, ShieldCheck } from 'lucide-react';
+import { FileText, ShieldAlert, CheckCircle, Newspaper, Highlighter, PenLine, AlertOctagon, DollarSign, XCircle, AlertTriangle, Skull, Handshake, Flame, ShoppingCart, Coffee, Scan, Sun, Stamp, ShieldCheck, Crown, Eye, ArrowLeft, Paperclip } from 'lucide-react';
 
 export const BriefingView: React.FC<{ day: DayConfig; onStart: () => void }> = ({ day, onStart }) => (
-  <div className="max-w-2xl w-full bg-stone-900 border border-stone-700 p-8 shadow-2xl text-stone-200 flex flex-col gap-6">
-    <div className="flex items-center gap-4 border-b border-stone-700 pb-4">
-      <FileText className="w-8 h-8 text-amber-500" />
-      <div>
-        <h2 className="text-sm uppercase tracking-widest text-stone-500">Day {day.day}</h2>
-        <h1 className="text-3xl font-bold text-amber-500">{day.title}</h1>
+  <div className="w-full h-full flex items-center justify-center p-8 bg-black/60 backdrop-blur-sm z-50 animate-slide-up">
+    {/* The Dossier Folder */}
+    <div className="relative w-[800px] min-h-[600px] bg-[#d2b48c] shadow-[0_20px_60px_rgba(0,0,0,0.8)] rotate-1 border-t-2 border-[#e6c9a3] rounded-sm transform transition-transform hover:rotate-0 duration-500">
+      
+      {/* Tab */}
+      <div className="absolute -top-6 left-0 w-48 h-8 bg-[#d2b48c] rounded-t-md border-t-2 border-[#e6c9a3] flex items-center justify-center shadow-md">
+         <span className="font-typewriter font-bold text-red-900 tracking-widest text-xs">CASE FILE #{day.day}</span>
+      </div>
+
+      {/* Paper Texture Overlay */}
+      <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cardboard.png')] pointer-events-none rounded-sm"></div>
+      
+      {/* Inner Paper Page */}
+      <div className="absolute top-4 left-4 right-4 bottom-4 bg-[#f4f1ea] shadow-inner p-8 md:p-12 flex flex-col gap-6 transform -rotate-1 origin-top-left paper-texture text-stone-900">
+        
+        {/* Paperclip */}
+        <div className="absolute -top-4 right-12 text-stone-400">
+           <Paperclip className="w-16 h-16 drop-shadow-lg transform rotate-12" />
+        </div>
+
+        {/* Coffee Stain */}
+        <div className="absolute bottom-12 right-12 opacity-10 pointer-events-none mix-blend-multiply rotate-[120deg]">
+           <svg width="120" height="120" viewBox="0 0 100 100">
+             <circle cx="50" cy="50" r="40" fill="none" stroke="#5d4037" strokeWidth="6" strokeDasharray="80 10" filter="blur(1px)"/>
+           </svg>
+        </div>
+
+        {/* Header */}
+        <div className="border-b-4 border-double border-stone-800 pb-4 flex justify-between items-end">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-[0.3em] text-stone-500 mb-2">Bureau of Records Integrity</div>
+            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-stone-900 leading-none">
+              {day.title}
+            </h1>
+          </div>
+          <div className="border-2 border-red-700 text-red-700 font-bold px-2 py-1 uppercase text-xs rotate-[-5deg] opacity-80 mix-blend-multiply">
+            Eyes Only
+          </div>
+        </div>
+
+        {/* Body Text */}
+        <div className="flex-1 font-typewriter text-sm md:text-base leading-relaxed text-justify relative">
+           <span className="float-left text-6xl font-black mr-3 mt-[-10px] opacity-20 font-serif">
+             {day.day}
+           </span>
+           <p>{day.briefing}</p>
+        </div>
+
+        {/* Directives / Rules Section */}
+        <div className="bg-stone-200/50 border-l-4 border-stone-800 p-6 relative">
+          <div className="absolute -top-3 left-4 bg-stone-800 text-stone-100 text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">
+            Operational Protocols
+          </div>
+          <ul className="space-y-3 mt-2 font-mono text-sm">
+            {day.rules.map((rule, idx) => {
+               const isHighlight = rule.action === 'highlight';
+               const isRecover = rule.action === 'recover';
+               const isVoid = rule.action === 'void';
+               
+               return (
+                <li key={idx} className="flex gap-3 items-start">
+                  {isHighlight ? (
+                    <Highlighter className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+                  ) : isRecover ? (
+                    <CheckCircle className="w-5 h-5 text-green-700 mt-0.5 shrink-0" />
+                  ) : isVoid ? (
+                    <AlertOctagon className="w-5 h-5 text-red-700 mt-0.5 shrink-0" />
+                  ) : (
+                    <PenLine className="w-5 h-5 text-stone-900 mt-0.5 shrink-0" />
+                  )}
+                  <span className={`font-bold ${
+                    isHighlight ? "text-amber-800" : 
+                    isRecover ? "text-green-800" : 
+                    isVoid ? "text-red-800" :
+                    "text-stone-900"
+                  }`}>
+                    {rule.description}
+                  </span>
+                </li>
+               );
+            })}
+          </ul>
+        </div>
+
+        {/* Signature / Accept */}
+        <div className="mt-4 flex justify-between items-end">
+           <div className="text-[10px] font-mono opacity-50">
+             Authorized By: Director Voss<br/>
+             Ref: {Math.random().toString(36).substring(7).toUpperCase()}
+           </div>
+           
+           <button 
+             onClick={onStart}
+             className="group relative"
+           >
+             <div className="absolute inset-0 bg-red-800 rounded blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+             <div className="relative border-4 border-red-800 text-red-800 font-stamp font-bold text-2xl px-6 py-2 uppercase tracking-widest rotate-[-2deg] group-hover:scale-105 transition-transform bg-[#f4f1ea] mix-blend-multiply cursor-pointer">
+               Accept Assignment
+             </div>
+           </button>
+        </div>
+
       </div>
     </div>
-    
-    <p className="text-lg leading-relaxed font-typewriter">
-      {day.briefing}
-    </p>
-
-    <div className="bg-stone-800 p-6 rounded border border-stone-700">
-      <h3 className="text-sm font-bold uppercase text-stone-400 mb-4 flex items-center gap-2">
-        <ShieldAlert className="w-4 h-4" />
-        Current Directives
-      </h3>
-      <ul className="space-y-3">
-        {day.rules.map((rule, idx) => {
-           const isHighlight = rule.action === 'highlight';
-           return (
-            <li key={idx} className="flex gap-3 text-stone-300 items-start">
-              {isHighlight ? (
-                <Highlighter className="w-5 h-5 text-yellow-400 mt-0.5 shrink-0" />
-              ) : (
-                <PenLine className="w-5 h-5 text-black bg-stone-200 rounded p-0.5 mt-0.5 shrink-0" />
-              )}
-              <span className={isHighlight ? "text-yellow-400 font-bold" : "text-stone-300"}>
-                {rule.description}
-              </span>
-            </li>
-           );
-        })}
-      </ul>
-    </div>
-
-    <button 
-      onClick={onStart}
-      className="mt-4 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded transition-colors self-start"
-    >
-      BEGIN SHIFT
-    </button>
   </div>
 );
 
@@ -373,7 +434,7 @@ export const FeedView: React.FC<{ feed: DayConfig['feed']; onNextDay: () => void
   </div>
 );
 
-export const GameOverView: React.FC<{ funds: number }> = ({ funds }) => (
+export const GameOverView: React.FC<{ funds: number; onBackToMenu: () => void }> = ({ funds, onBackToMenu }) => (
   <div className="max-w-xl w-full bg-black text-red-600 border-4 border-red-800 p-10 shadow-2xl flex flex-col gap-6 items-center text-center font-typewriter">
     <Skull className="w-24 h-24 text-red-700 animate-pulse" />
     <h1 className="text-5xl font-black uppercase tracking-widest text-red-500">TERMINATED</h1>
@@ -384,8 +445,56 @@ export const GameOverView: React.FC<{ funds: number }> = ({ funds }) => (
     <p className="text-lg text-white/70">
       The Bureau does not employ those who cannot manage their own assets. You have been designated for immediate liquidation.
     </p>
-    <button onClick={() => window.location.reload()} className="mt-8 bg-red-900 hover:bg-red-700 text-white px-8 py-4 font-bold uppercase tracking-widest transition-colors">
+    <button onClick={onBackToMenu} className="mt-8 bg-red-900 hover:bg-red-700 text-white px-8 py-4 font-bold uppercase tracking-widest transition-colors">
       RESTART LIFE CYCLE
     </button>
   </div>
 );
+
+export const VictoryView: React.FC<{ funds: number; moralScore: number; onBackToMenu: () => void }> = ({ funds, moralScore, onBackToMenu }) => {
+  const isCorrupt = moralScore <= -1; // Negative moral score means you took bribes/obeyed corrupt orders
+  
+  return (
+    <div className="max-w-3xl w-full bg-black/90 p-12 shadow-2xl flex flex-col gap-8 text-center animate-slide-up border-8 border-double relative">
+      <div className={`absolute inset-0 opacity-20 pointer-events-none ${isCorrupt ? 'bg-amber-900' : 'bg-blue-900'}`}></div>
+      
+      <div className="z-10 flex flex-col items-center">
+        {isCorrupt ? (
+           <Crown className="w-32 h-32 text-amber-500 mb-6 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+        ) : (
+           <Eye className="w-32 h-32 text-blue-400 mb-6 drop-shadow-[0_0_15px_rgba(96,165,250,0.5)]" />
+        )}
+
+        <h1 className={`text-6xl md:text-7xl font-black uppercase tracking-tighter mb-4 ${isCorrupt ? 'text-amber-500' : 'text-blue-400'}`}>
+          {isCorrupt ? "The Inner Circle" : "The Whistleblower"}
+        </h1>
+        
+        <div className={`w-32 h-1 mb-8 ${isCorrupt ? 'bg-amber-700' : 'bg-blue-700'}`}></div>
+
+        <p className="text-2xl font-typewriter text-stone-300 leading-relaxed mb-8">
+          {isCorrupt 
+            ? "Your loyalty has been noted. The Directives were a test, and you passed. You are no longer just a clerk; you are an architect of history. Welcome to the Directorate."
+            : "You refused to be silenced. You burned the bribes and rejected the lies. The files you leaked have sparked a revolution. You may be on the run, but the truth is free."
+          }
+        </p>
+
+        <div className="grid grid-cols-2 gap-8 w-full border-t border-stone-800 pt-8 mt-4">
+           <div>
+             <span className="block text-xs uppercase text-stone-500 tracking-widest mb-2">Final Balance</span>
+             <span className="text-4xl font-bold text-white">${funds}</span>
+           </div>
+           <div>
+             <span className="block text-xs uppercase text-stone-500 tracking-widest mb-2">Morality Index</span>
+             <span className={`text-4xl font-bold ${isCorrupt ? 'text-red-500' : 'text-green-500'}`}>
+               {moralScore > 0 ? '+' : ''}{moralScore}
+             </span>
+           </div>
+        </div>
+        
+        <button onClick={onBackToMenu} className={`mt-12 px-10 py-4 font-bold uppercase tracking-[0.2em] transition-all hover:scale-105 ${isCorrupt ? 'bg-amber-700 hover:bg-amber-600 text-white' : 'bg-blue-800 hover:bg-blue-700 text-white'}`}>
+          {isCorrupt ? "Accept Promotion" : "Vanish Into The Night"}
+        </button>
+      </div>
+    </div>
+  );
+};

@@ -2,9 +2,11 @@
 export type TokenType = 
   | 'text' 
   | 'social_id' 
+  | 'financial_id'
   | 'address' 
   | 'name' 
   | 'minor_name' 
+  | 'minor_age'
   | 'school' 
   | 'witness' 
   | 'phone' 
@@ -126,6 +128,7 @@ export interface GameSave {
   moralScore: number;
   purchasedUpgrades: UpgradeType[];
   maxChapterReached: number;
+  maxDayReached: number;
 }
 
 export interface GameState {
@@ -144,4 +147,5 @@ export interface GameState {
 
   flags: Record<string, boolean>;
   purchasedUpgrades: UpgradeType[];
+  maxDayReached: number;
 }

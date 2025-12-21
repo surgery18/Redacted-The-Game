@@ -1,6 +1,30 @@
 
 import { Token, TokenType, DayConfig, Mistake } from './types';
 
+// Helper to map technical types to human-readable strings for the audit log
+const getTypeLabel = (type: TokenType | 'normal'): string => {
+  const mapping: Partial<Record<TokenType | 'normal', string>> = {
+    'minor_name': 'MINOR (NAME)',
+    'minor_age': 'MINOR (AGE)',
+    'victim': 'VICTIM IDENTITY',
+    'financial_id': 'ACCOUNT/ROUTING #',
+    'social_id': 'SOCIAL SECURITY #',
+    'name': 'GUEST NAME',
+    'location': 'SENSITIVE LOCATION',
+    'panic_phrase': 'INCIDENT DETAIL',
+    'diagnosis': 'MEDICAL DIAGNOSIS',
+    'clinic_name': 'FACILITY NAME',
+    'eidolon': 'CLASSIFIED KEYWORD',
+    'timestamp': 'RESTRICTED DATE',
+    'vip_protect': 'PROTECTED PERSONNEL',
+    'vip_expose': 'RELIABILITY RISK',
+    'contamination': 'SYSTEM CORRUPTION',
+    'whistleblower': 'DISSIDENT IDENTITY',
+    'sensitive': 'RESTRICTED DATA'
+  };
+  return mapping[type] || type.toUpperCase();
+};
+
 // Parses text like: "{Dr. Smith|name|ID:123||License Expired}"
 export const parseDocumentContent = (content: string): Token[] => {
   const tokens: Token[] = [];
@@ -196,7 +220,7 @@ export const calculateScore = (
         correct++;
       } else {
         missed++;
-        mistakes.push({ text: t.text, type: 'MISSED', hint: t.type });
+        mistakes.push({ text: t.text, type: 'MISSED', hint: getTypeLabel(t.type) });
       }
     } 
     else if (highlightTypes.has(t.type)) {
@@ -205,7 +229,7 @@ export const calculateScore = (
         correct++;
       } else {
         missed++; 
-        mistakes.push({ text: t.text, type: 'MISSED_HIGHLIGHT', hint: t.type });
+        mistakes.push({ text: t.text, type: 'MISSED_HIGHLIGHT', hint: getTypeLabel(t.type) });
       }
     }
     else if (recoverTypes.has(t.type)) {
@@ -214,19 +238,19 @@ export const calculateScore = (
         correct++;
       } else {
         missed++;
-        mistakes.push({ text: t.text, type: 'MISSED_RECOVERY', hint: 'Required Declassification' });
+        mistakes.push({ text: t.text, type: 'MISSED_RECOVERY', hint: 'DECLASSIFICATION' });
       }
     }
     else {
       // If it's redacted but NOT required, and NOT part of an explicit 'none' trap rule
       if (isRedacted && !noRedactTypes.has(t.type)) {
         overRedacted++;
-        mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'Safe Info' });
+        mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'SAFE INFO' });
       }
       // If it's part of a trap rule and is redacted, it's also over-redacted
       if (isRedacted && noRedactTypes.has(t.type)) {
         overRedacted++;
-        mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'Explicitly Protected Info' });
+        mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'PROTECTED INFO' });
       }
     }
   });

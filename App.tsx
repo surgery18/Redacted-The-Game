@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { GameState, ToolType, Citation, AuditLogEntry, SpecialDirective, UpgradeType, GameSave, ChapterConfig } from './types';
 import { DAYS, CHAPTERS } from './data/content';
 import { DocumentView } from './components/DocumentView';
-import { BriefingView, EvaluationView, FeedView, GameOverView, ShopView } from './components/GameViews';
+import { BriefingView, EvaluationView, FeedView, GameOverView, ShopView, VictoryView } from './components/GameViews';
 import { MainMenu, ChapterSelect, ChapterIntro } from './components/MenuViews';
 import { calculateScore, parseDocumentContent } from './utils';
 import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope } from 'lucide-react';
@@ -148,9 +148,10 @@ const App: React.FC = () => {
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
   const [currentTool, setCurrentTool] = useState<ToolType>('hand');
   
-  // Chapter State
+  // Progression State
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [maxChapterReached, setMaxChapterReached] = useState(1);
+  const [maxDayReached, setMaxDayReached] = useState(0); // Index of furthest reached day
   const [activeChapter, setActiveChapter] = useState<ChapterConfig>(CHAPTERS[0]);
 
   // Document Annotations
@@ -187,6 +188,11 @@ const App: React.FC = () => {
   const currentDocs = currentDayConfig.documents;
   const currentDoc = currentDocs[currentDocIndex];
 
+  // Helper to get current chapter based on day index
+  const getChapterForDay = (index: number) => {
+    return CHAPTERS.find(c => index >= c.startDayIndex && index <= c.endDayIndex) || CHAPTERS[0];
+  };
+
   // Save System
   const saveGame = () => {
     const save: GameSave = {
@@ -194,7 +200,8 @@ const App: React.FC = () => {
       funds: totalFunds,
       moralScore,
       purchasedUpgrades,
-      maxChapterReached
+      maxChapterReached,
+      maxDayReached
     };
     localStorage.setItem('redacted_save', JSON.stringify(save));
   };
@@ -207,11 +214,18 @@ const App: React.FC = () => {
       setTotalFunds(save.funds);
       setMoralScore(save.moralScore);
       setPurchasedUpgrades(save.purchasedUpgrades);
-      setMaxChapterReached(save.maxChapterReached);
       
-      // Determine chapter
-      const chapter = CHAPTERS.find(c => save.dayIndex >= c.startDayIndex && save.dayIndex <= c.endDayIndex) || CHAPTERS[0];
-      setActiveChapter(chapter);
+      const currentChap = getChapterForDay(save.dayIndex);
+      
+      // Ensure maxDayReached is at least the current dayIndex
+      const updatedMaxDay = Math.max(save.maxDayReached || 0, save.dayIndex);
+      setMaxDayReached(updatedMaxDay);
+      
+      // Ensure maxChapterReached is at least the current chapter
+      const updatedMaxChap = Math.max(save.maxChapterReached || 1, currentChap.number);
+      setMaxChapterReached(updatedMaxChap);
+      
+      setActiveChapter(currentChap);
       
       return true;
     }
@@ -225,6 +239,7 @@ const App: React.FC = () => {
     setMoralScore(0);
     setPurchasedUpgrades([]);
     setMaxChapterReached(1);
+    setMaxDayReached(0);
     setActiveChapter(CHAPTERS[0]);
     setPhase('CHAPTER_INTRO');
     saveGame();
@@ -236,15 +251,22 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSelectChapter = (chapter: ChapterConfig) => {
+  const handleSelectDay = (selectedDayIndex: number) => {
+    setDayIndex(selectedDayIndex);
+    const chapter = getChapterForDay(selectedDayIndex);
     setActiveChapter(chapter);
-    setDayIndex(chapter.startDayIndex);
     setShowChapterSelect(false);
-    setPhase('CHAPTER_INTRO');
+    setPhase('BRIEFING');
   };
 
   const handleStartChapter = () => {
     setPhase('BRIEFING');
+  };
+  
+  const handleBackToMenu = () => {
+    setPhase('MENU');
+    setShowChapterSelect(false);
+    setIsDirectiveBurned(false);
   };
   
   // Calculate dynamic expenses based on day
@@ -264,7 +286,6 @@ const App: React.FC = () => {
 
   const currentExpenses = calculateExpenses();
 
-  // Combine unlocked tools from DayConfig with Purchased Upgrades
   const availableTools = useMemo(() => {
     const base = ['hand', ...(currentDayConfig.unlockedTools || ['marker'])];
     if (purchasedUpgrades.includes('stamp')) base.push('stamp');
@@ -278,11 +299,9 @@ const App: React.FC = () => {
   useEffect(() => {
     setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); // approx center for 850x1100 doc
     
-    // Auto-Lens Logic: Highlighting 3 random sensitive tokens if Lens is owned
     if (phase === 'WORK' && purchasedUpgrades.includes('lens')) {
       const tokens = parseDocumentContent(currentDoc.content);
       const sensitiveTokens = tokens.filter(t => t.type !== 'normal');
-      // Pick 3 random
       const shuffled = sensitiveTokens.sort(() => 0.5 - Math.random());
       const selected = shuffled.slice(0, 3).map(t => t.id);
       
@@ -303,14 +322,14 @@ const App: React.FC = () => {
     setVoidedDocs({});
     setCurrentTool('hand'); 
     setDailyScore({ correct: 0, missed: 0, overRedacted: 0, totalSensitive: 0 });
-    setDailyFinancials({ bribe: 0, penalty: 0, wage: 120 }); // Reset daily tracking
+    setDailyFinancials({ bribe: 0, penalty: 0, wage: 120 });
     setDailyAuditLogs([]);
     setCitation(null);
-    setIsDirectiveBurned(false); // Reset burnt status
+    setIsDirectiveBurned(false);
+    saveGame(); // Save on start so we don't lose the day if refreshing
   };
 
   const finishShop = () => {
-    // Check for Game Over condition
     if (totalFunds < -50) {
       setPhase('GAME_OVER');
       return;
@@ -320,11 +339,14 @@ const App: React.FC = () => {
       const nextDay = dayIndex + 1;
       setDayIndex(nextDay);
       
-      // Check if new Chapter
-      const nextChapter = CHAPTERS.find(c => c.startDayIndex === nextDay);
-      if (nextChapter) {
+      // Update max day reached
+      if (nextDay > maxDayReached) {
+        setMaxDayReached(nextDay);
+      }
+
+      const nextChapter = getChapterForDay(nextDay);
+      if (nextChapter.number > activeChapter.number) {
          setActiveChapter(nextChapter);
-         // Update Max Reached
          if (nextChapter.number > maxChapterReached) {
             setMaxChapterReached(nextChapter.number);
          }
@@ -345,14 +367,11 @@ const App: React.FC = () => {
     }
   };
 
-  // --- Document Interaction Logic ---
   const handleDocMouseDown = (e: React.MouseEvent) => {
-    // Only drag if Hand tool is selected
     if (currentTool !== 'hand' || e.button !== 0) return;
-    
     setIsDraggingDoc(true);
     setDocDragRel({ x: e.clientX - docPos.x, y: e.clientY - docPos.y });
-    e.stopPropagation(); // Prevent bubbling if needed
+    e.stopPropagation();
   };
 
   useEffect(() => {
@@ -361,18 +380,13 @@ const App: React.FC = () => {
     const onMouseMove = (e: MouseEvent) => {
       let newX = e.clientX - docDragRel.x;
       let newY = e.clientY - docDragRel.y;
-
-      // Basic constraints to keep it roughly on screen
       const margin = 100;
       newX = Math.max(-400, Math.min(window.innerWidth - margin, newX));
       newY = Math.max(-400, Math.min(window.innerHeight - margin, newY));
-
       setDocPos({ x: newX, y: newY });
 
-      // Check collision with outbox
       if (outboxRef.current) {
         const outboxRect = outboxRef.current.getBoundingClientRect();
-        // Mouse pointer is the 'truth' for the file icon effect
         if (
           e.clientX >= outboxRect.left && 
           e.clientX <= outboxRect.right && 
@@ -388,11 +402,9 @@ const App: React.FC = () => {
 
     const onMouseUp = () => {
       setIsDraggingDoc(false);
-      
       if (isHoveringOutbox) {
         submitCurrentDoc();
         setIsHoveringOutbox(false);
-        // Reset doc position slightly off screen or re-center for next doc
         setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 });
       }
     };
@@ -422,14 +434,12 @@ const App: React.FC = () => {
     }
 
     if (currentTool === 'marker') {
-      // Black Marker
       setRedactions(p => { 
         const s = new Set(p[currentDoc.id]); 
         const isCurrentlyRedacted = s.has(tokenIds[0]);
         tokenIds.forEach(id => isCurrentlyRedacted ? s.delete(id) : s.add(id));
         return { ...p, [currentDoc.id]: s }; 
       });
-      // Remove other marks on this token
       const clearOthers = (prev: Record<string, Set<string>>) => {
         const s = new Set(prev[currentDoc.id]); 
         tokenIds.forEach(id => s.delete(id)); 
@@ -439,14 +449,12 @@ const App: React.FC = () => {
       setRecovered(clearOthers);
     } 
     else if (currentTool === 'highlighter') {
-      // Yellow Highlighter
       setHighlights(p => { 
         const s = new Set(p[currentDoc.id]); 
         const isCurrentlyHighlighted = s.has(tokenIds[0]);
         tokenIds.forEach(id => isCurrentlyHighlighted ? s.delete(id) : s.add(id));
         return { ...p, [currentDoc.id]: s }; 
       });
-      // Clear others
       const clearOthers = (prev: Record<string, Set<string>>) => {
         const s = new Set(prev[currentDoc.id]); 
         tokenIds.forEach(id => s.delete(id)); 
@@ -456,14 +464,12 @@ const App: React.FC = () => {
       setRecovered(clearOthers);
     }
     else if (currentTool === 'recover') {
-       // Green Marker
        setRecovered(p => {
          const s = new Set(p[currentDoc.id]);
          const isCurrentlyRecovered = s.has(tokenIds[0]);
          tokenIds.forEach(id => isCurrentlyRecovered ? s.delete(id) : s.add(id));
          return { ...p, [currentDoc.id]: s };
        });
-       // Clear others
        const clearOthers = (prev: Record<string, Set<string>>) => {
          const s = new Set(prev[currentDoc.id]); 
          tokenIds.forEach(id => s.delete(id)); 
@@ -479,18 +485,14 @@ const App: React.FC = () => {
        submitCurrentDoc();
        return;
     }
-    
     if (currentTool === 'void_stamp') {
-       // Toggle Void status
        setVoidedDocs(prev => ({
          ...prev,
          [currentDoc.id]: !prev[currentDoc.id]
        }));
        return;
     }
-
     if (currentTool === 'stamp') {
-      // Default Stamp behavior (Redact All)
       const ids = parseDocumentContent(currentDoc.content).map(t => t.id);
       setRedactions(p => ({ ...p, [currentDoc.id]: new Set(ids) }));
       setHighlights(p => ({ ...p, [currentDoc.id]: new Set() }));
@@ -499,7 +501,6 @@ const App: React.FC = () => {
   };
 
   const submitCurrentDoc = () => {
-    // Calculate score for this doc
     const result = calculateScore(
       parseDocumentContent(currentDoc.content), 
       redactions[currentDoc.id] || new Set(), 
@@ -507,17 +508,15 @@ const App: React.FC = () => {
       recovered[currentDoc.id] || new Set(), 
       voidedDocs[currentDoc.id] || false,
       currentDayConfig.rules,
-      // Pass the directive regardless of burnt status
       currentDayConfig.specialDirective
     );
 
     const { stats, mistakes, financials, moralChange } = result;
 
-    // Update daily totals
     setDailyScore(prev => ({
       correct: prev.correct + stats.correct,
       missed: prev.missed + stats.missed,
-      overRedacted: prev.overRedacted + stats.overRedacted, // Accumulate
+      overRedacted: prev.overRedacted + stats.overRedacted,
       totalSensitive: prev.totalSensitive + stats.totalSensitive
     }));
 
@@ -529,7 +528,6 @@ const App: React.FC = () => {
 
     setMoralScore(prev => prev + moralChange);
 
-    // Record Audit Log
     setDailyAuditLogs(prev => [
       ...prev,
       {
@@ -539,7 +537,6 @@ const App: React.FC = () => {
       }
     ]);
 
-    // Trigger Citation/Feedback
     let newCitation: Citation | null = null;
     if (financials.bribeEarned > 0) {
       newCitation = { type: 'BRIBE', message: 'DIRECTIVE COMPLIANCE', amount: financials.bribeEarned };
@@ -552,21 +549,17 @@ const App: React.FC = () => {
     }
     setCitation(newCitation);
     
-    // IMMEDIATE TRANSITION (Fast Feedback)
     setTimeout(() => {
-        // We do NOT clear citation here immediately, we let it linger for the user to see while they start the next doc
-        setTimeout(() => setCitation(null), 3000); // Clear citation after 3 seconds
+        setTimeout(() => setCitation(null), 3000);
 
         if (currentDocIndex < currentDocs.length - 1) {
           setCurrentDocIndex(p => p + 1);
         } else {
-           // END OF DAY CHECK FOR UNBURNED DIRECTIVE
            if (currentDayConfig.specialDirective && !isDirectiveBurned) {
               setDailyFinancials(prev => ({
                 ...prev,
-                penalty: prev.penalty + 50 // Fine
+                penalty: prev.penalty + 50
               }));
-              
               setDailyAuditLogs(prev => [
                 ...prev, 
                 {
@@ -576,14 +569,12 @@ const App: React.FC = () => {
                 }
               ]);
            }
-
            setPhase('EVALUATION');
         }
-    }, 100); // 100ms delay just to see the button press visual
+    }, 100);
   };
 
   const proceedToShop = () => {
-    // Deduct expenses immediately upon entering shop logic
     let deduction = currentExpenses.food + currentExpenses.heat;
     if (currentExpenses.rentDue) {
       deduction += currentExpenses.rent;
@@ -593,21 +584,15 @@ const App: React.FC = () => {
   };
 
   const handleEvaluationNext = () => {
-    // Calculate final net pay again to properly update funds in state
     const deductions = (dailyScore.missed * 10) + (dailyScore.overRedacted * 5) + dailyFinancials.penalty;
     const netPay = dailyFinancials.wage + dailyFinancials.bribe - deductions;
-    
     setTotalFunds(prev => prev + netPay);
     setPhase('FEED');
   };
 
   return (
     <div id="desk-container" className="w-screen h-screen bg-[#1c1917] flex items-center justify-center relative overflow-hidden bg-noise shadow-inner">
-      
-      {/* Vignette Effect */}
       <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.6)_100%)]"></div>
-
-      {/* Main Desk Surface */}
       <div className="z-10 w-full h-full relative">
 
         {phase === 'MENU' && (
@@ -616,7 +601,8 @@ const App: React.FC = () => {
               <ChapterSelect 
                 chapters={CHAPTERS}
                 maxChapterReached={maxChapterReached}
-                onSelectChapter={handleSelectChapter}
+                maxDayReached={maxDayReached}
+                onSelectDay={handleSelectDay}
                 onBack={() => setShowChapterSelect(false)}
               />
             ) : (
@@ -636,14 +622,13 @@ const App: React.FC = () => {
         )}
         
         {phase === 'BRIEFING' && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center z-50">
             <BriefingView day={currentDayConfig} onStart={handleStartDay} />
           </div>
         )}
         
         {phase === 'WORK' && currentDoc && (
           <>
-            {/* Draggable Sticky Note: Day Info */}
             <DraggableItem initialPos={{ x: 50, y: 50 }}>
                <div className="bg-yellow-200 text-stone-900 p-4 w-64 shadow-lg rotate-[-2deg] font-handwriting transform hover:scale-105 transition-transform duration-300 cursor-pointer">
                   <div className="font-bold text-sm uppercase border-b border-stone-800 pb-1 mb-2 flex justify-between">
@@ -660,7 +645,6 @@ const App: React.FC = () => {
                </div>
             </DraggableItem>
 
-            {/* Draggable Clipboard: Rules */}
             <DraggableItem initialPos={{ x: 50, y: 250 }}>
                <div className="bg-[#4a3b32] p-2 rounded shadow-2xl relative w-64 cursor-pointer">
                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-stone-300 rounded shadow-md border-t border-white/50 flex items-center justify-center">
@@ -679,7 +663,6 @@ const App: React.FC = () => {
                </div>
             </DraggableItem>
 
-            {/* Draggable Shadow Directive (Black Envelope) */}
             {currentDayConfig.specialDirective && !isDirectiveBurned && (
                <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 100 }}>
                  <BurnableDirective 
@@ -689,13 +672,9 @@ const App: React.FC = () => {
                </DraggableItem>
             )}
 
-            {/* The Document / File Icon */}
             {isDraggingDoc && isHoveringOutbox ? (
-               // Visual feedback when hovering outbox (Shrink to file icon)
                <div 
                  className="absolute pointer-events-none z-[70] flex flex-col items-center justify-center animate-pulse"
-                 // Calculate exact cursor position: docPos (top-left) + relative mouse offset = Cursor X/Y
-                 // Then subtract half width (48px) and height (48px) to center
                  style={{ 
                     left: docPos.x + docDragRel.x - 48, 
                     top: docPos.y + docDragRel.y - 48
@@ -705,7 +684,6 @@ const App: React.FC = () => {
                  <span className="bg-black text-white px-2 py-1 text-xs font-bold uppercase rounded mt-2">Release to Submit</span>
                </div>
             ) : (
-               // The Full Document
                <DocumentView 
                  data={currentDoc} 
                  redactedIds={redactions[currentDoc.id] || new Set()} 
@@ -724,7 +702,6 @@ const App: React.FC = () => {
                />
             )}
 
-            {/* Outbox Tray (Drop Target) */}
             <div 
               ref={outboxRef}
               className={`absolute right-10 bottom-32 w-64 h-48 rounded-lg border-b-[16px] border-r-[16px] transition-all duration-300 flex items-center justify-center z-[55]
@@ -738,14 +715,12 @@ const App: React.FC = () => {
                 <GripHorizontal className="w-3 h-3 opacity-50"/>
                 OUTBOX
               </div>
-              
               <div className="text-stone-600 flex flex-col items-center gap-2">
                  <div className="w-32 h-2 bg-black/20 rounded-full"></div>
                  <div className="w-24 h-2 bg-black/20 rounded-full"></div>
               </div>
             </div>
 
-            {/* Bottom: Tool Tray */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[#2a2522] px-8 pb-4 pt-6 rounded-t-xl shadow-2xl border-t border-white/10 flex gap-4 z-[40]">
                {availableTools.map(t => (
                   <button 
@@ -768,6 +743,7 @@ const App: React.FC = () => {
                       ${t === 'seal' ? 'bg-amber-600 border-amber-300 text-amber-100' : ''}
                       ${t === 'lens' ? 'bg-stone-200 border-white text-stone-800' : ''}
                       ${t === 'eraser' ? 'bg-pink-300 border-pink-200 text-pink-800' : ''}
+                      ${t === 'analyzer' && <Microscope className="w-6 h-6" />}
                       ${t === 'analyzer' ? 'bg-sky-900 border-cyan-500 text-cyan-200' : ''}
                     `}>
                       {t === 'hand' && <Hand className="w-6 h-6" />}
@@ -789,7 +765,6 @@ const App: React.FC = () => {
                ))}
             </div>
 
-            {/* Citation / Feedback Popup */}
             {citation && (
               <div className="absolute bottom-32 right-80 z-[100] animate-slide-up">
                 <div className={`
@@ -841,18 +816,13 @@ const App: React.FC = () => {
 
         {phase === 'GAME_OVER' && (
           <div className="absolute inset-0 flex items-center justify-center z-50 bg-black">
-            <GameOverView funds={totalFunds} />
+            <GameOverView funds={totalFunds} onBackToMenu={handleBackToMenu} />
           </div>
         )}
         
         {phase === 'VICTORY' && (
            <div className="absolute inset-0 flex items-center justify-center z-50">
-             <div className="text-white text-center max-w-lg z-50">
-               <div className="mb-8 border-4 border-amber-600 p-8 bg-black/90"><h1 className="text-6xl font-black mb-4 uppercase tracking-tighter">End of Records</h1><p className="text-xl opacity-70 font-typewriter">The truth is now what the Bureau says it is.</p></div>
-               <p className="mb-4">Final Funds: ${totalFunds}</p>
-               <p className="mb-8 font-bold text-amber-500">{moralScore > 0 ? "You kept your soul intact." : "You survived, but at what cost?"}</p>
-               <button onClick={() => window.location.reload()} className="bg-stone-200 text-black px-8 py-3 font-bold uppercase hover:bg-amber-600 hover:text-white transition-colors">Re-Archive</button>
-             </div>
+             <VictoryView funds={totalFunds} moralScore={moralScore} onBackToMenu={handleBackToMenu} />
            </div>
         )}
       </div>
