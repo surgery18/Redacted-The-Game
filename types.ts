@@ -128,6 +128,8 @@ export interface GameSave {
   purchasedUpgrades: UpgradeType[];
   maxChapterReached: number;
   maxDayReached: number;
+  seenTools?: ToolType[]; // Track which tool tutorials have been shown
+  tutorialCompleted?: boolean; // Track if Day 1 tutorial is done
 }
 
 export interface GameState {

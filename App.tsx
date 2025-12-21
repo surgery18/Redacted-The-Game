@@ -5,16 +5,19 @@ import { DAYS, CHAPTERS } from './data/content';
 import { DocumentView } from './components/DocumentView';
 import { BriefingView, EvaluationView, FeedView, GameOverView, ShopView, VictoryView } from './components/GameViews';
 import { MainMenu, ChapterSelect, ChapterIntro } from './components/MenuViews';
+import { TutorialNote, ToolPopup } from './components/Tutorial';
 import { calculateScore, parseDocumentContent } from './utils';
-import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope, Key } from 'lucide-react';
+import { audio } from './utils/audio';
+import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope, Key, Volume2, VolumeX } from 'lucide-react';
 
 // --- Draggable Helper Component ---
 const DraggableItem: React.FC<{ 
   initialPos: { x: number, y: number, right?: boolean, bottom?: boolean }, 
   children: React.ReactNode, 
   className?: string, 
-  style?: React.CSSProperties
-}> = ({ initialPos, children, className, style }) => {
+  style?: React.CSSProperties,
+  onDragStart?: () => void
+}> = ({ initialPos, children, className, style, onDragStart }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [hasInitialized, setHasInitialized] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -29,6 +32,9 @@ const DraggableItem: React.FC<{
 
   const onMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
+    if (onDragStart) onDragStart();
+    else audio.playPaperRustle();
+    
     setDragging(true);
     setRel({ x: e.clientX - pos.x, y: e.clientY - pos.y });
     e.stopPropagation();
@@ -72,6 +78,7 @@ const BurnableDirective: React.FC<{
   const handleBurn = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsBurning(true);
+    audio.playBurn();
     // Wait for animation to finish before removing
     setTimeout(onBurnComplete, 1900); 
   };
@@ -123,6 +130,12 @@ const BurnableDirective: React.FC<{
            <span className="text-green-700">Reward: ${directive.bribeReward}</span>
            <span className="text-red-700">Refusal: -${directive.disobediencePenalty}</span>
         </div>
+        
+        {/* Drag Hint */}
+        <div className="mt-3 pt-2 border-t border-stone-800 text-[9px] text-stone-600 text-center uppercase tracking-widest font-sans opacity-50">
+           (You can drag me around the screen)
+        </div>
+
         <div className="absolute -right-2 -top-2">
            <EyeOff className="w-6 h-6 text-stone-600" />
         </div>
@@ -148,11 +161,20 @@ const App: React.FC = () => {
   const [currentDocIndex, setCurrentDocIndex] = useState(0);
   const [currentTool, setCurrentTool] = useState<ToolType>('hand');
   
+  // Audio State
+  const [isMuted, setIsMuted] = useState(false);
+
   // Progression State
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [maxChapterReached, setMaxChapterReached] = useState(1);
   const [maxDayReached, setMaxDayReached] = useState(0); // Index of furthest reached day
   const [activeChapter, setActiveChapter] = useState<ChapterConfig>(CHAPTERS[0]);
+
+  // Tutorial State
+  const [tutorialStep, setTutorialStep] = useState<number>(-1); // -1 = No Tutorial
+  const [seenTools, setSeenTools] = useState<ToolType[]>(['hand']); // Tools the user has already seen popup for
+  const [activeToolPopup, setActiveToolPopup] = useState<ToolType | null>(null);
+  const [tutorialCompleted, setTutorialCompleted] = useState(false);
 
   // Document Annotations
   const [redactions, setRedactions] = useState<Record<string, Set<string>>>({});
@@ -188,20 +210,60 @@ const App: React.FC = () => {
   const currentDocs = currentDayConfig.documents;
   const currentDoc = currentDocs[currentDocIndex];
 
+  // Initialize Audio Logic
+  const handleToggleMute = () => {
+    const muted = audio.toggleMute();
+    setIsMuted(muted);
+  };
+
   // Helper to get current chapter based on day index
   const getChapterForDay = (index: number) => {
     return CHAPTERS.find(c => index >= c.startDayIndex && index <= c.endDayIndex) || CHAPTERS[0];
   };
 
+  // --- Helpers for Tutorial Logic ---
+  const currentDocTokens = useMemo(() => 
+    currentDoc ? parseDocumentContent(currentDoc.content) : [], 
+    [currentDoc]
+  );
+
+  // Monitor Redactions for Tutorial Step 3 -> 4 Transition
+  useEffect(() => {
+    if (tutorialStep !== 3 && tutorialStep !== 4) return;
+    if (dayIndex !== 0 || !currentDoc) return;
+    
+    const names = currentDocTokens.filter(t => t.type === 'name');
+    const currentRedactions = redactions[currentDoc.id] || new Set();
+    const unredacted = names.filter(t => !currentRedactions.has(t.id));
+    
+    // Check if the only remaining unredacted item is the Special Directive Target (Bill)
+    const specialTargets = currentDayConfig.specialDirective?.targetText || [];
+    const isOnlySpecialLeft = unredacted.length > 0 && unredacted.every(t => 
+        specialTargets.some(target => t.text.includes(target))
+    );
+    
+    const isAllRedacted = unredacted.length === 0;
+    
+    if (isAllRedacted || isOnlySpecialLeft) {
+       // All done, or only optional target left -> Allow progressing to next step
+       if (tutorialStep === 3) setTutorialStep(4);
+    } else {
+       // Still have required names -> Go back to step 3 if we were at 4
+       if (tutorialStep === 4) setTutorialStep(3);
+    }
+  }, [redactions, currentDocTokens, tutorialStep, dayIndex, currentDoc, currentDayConfig]);
+
   // Save System
-  const saveGame = () => {
+  const saveGame = (overrides?: Partial<GameSave>) => {
     const save: GameSave = {
-      dayIndex,
-      funds: totalFunds,
-      moralScore,
-      purchasedUpgrades,
-      maxChapterReached,
-      maxDayReached
+      dayIndex: overrides?.dayIndex ?? dayIndex,
+      funds: overrides?.funds ?? totalFunds,
+      moralScore: overrides?.moralScore ?? moralScore,
+      purchasedUpgrades: overrides?.purchasedUpgrades ?? purchasedUpgrades,
+      maxChapterReached: overrides?.maxChapterReached ?? maxChapterReached,
+      maxDayReached: overrides?.maxDayReached ?? maxDayReached,
+      seenTools: overrides?.seenTools ?? seenTools,
+      tutorialCompleted: overrides?.tutorialCompleted ?? tutorialCompleted
     };
     localStorage.setItem('redacted_save', JSON.stringify(save));
   };
@@ -214,17 +276,12 @@ const App: React.FC = () => {
       setTotalFunds(save.funds);
       setMoralScore(save.moralScore);
       setPurchasedUpgrades(save.purchasedUpgrades);
+      setSeenTools(save.seenTools || ['hand']);
+      setTutorialCompleted(save.tutorialCompleted || false);
       
       const currentChap = getChapterForDay(save.dayIndex);
-      
-      // Ensure maxDayReached is at least the current dayIndex
-      const updatedMaxDay = Math.max(save.maxDayReached || 0, save.dayIndex);
-      setMaxDayReached(updatedMaxDay);
-      
-      // Ensure maxChapterReached is at least the current chapter
-      const updatedMaxChap = Math.max(save.maxChapterReached || 1, currentChap.number);
-      setMaxChapterReached(updatedMaxChap);
-      
+      setMaxDayReached(Math.max(save.maxDayReached || 0, save.dayIndex));
+      setMaxChapterReached(Math.max(save.maxChapterReached || 1, currentChap.number));
       setActiveChapter(currentChap);
       
       return true;
@@ -234,24 +291,42 @@ const App: React.FC = () => {
 
   // Menu Handlers
   const handleNewGame = () => {
+    audio.ensureContext();
+    audio.playClick();
+    audio.startMusic();
     setDayIndex(0);
     setTotalFunds(150);
     setMoralScore(0);
     setPurchasedUpgrades([]);
+    setSeenTools(['hand']);
+    setTutorialCompleted(false);
     setMaxChapterReached(1);
     setMaxDayReached(0);
     setActiveChapter(CHAPTERS[0]);
     setPhase('CHAPTER_INTRO');
-    saveGame();
+    saveGame({ 
+      dayIndex: 0, 
+      funds: 150, 
+      moralScore: 0, 
+      purchasedUpgrades: [], 
+      maxChapterReached: 1, 
+      maxDayReached: 0, 
+      seenTools: ['hand'], 
+      tutorialCompleted: false 
+    });
   };
 
   const handleContinue = () => {
+    audio.ensureContext();
+    audio.playClick();
+    audio.startMusic();
     if (loadGame()) {
       setShowChapterSelect(true);
     }
   };
 
   const handleSelectDay = (selectedDayIndex: number) => {
+    audio.playClick();
     setDayIndex(selectedDayIndex);
     const chapter = getChapterForDay(selectedDayIndex);
     setActiveChapter(chapter);
@@ -260,10 +335,12 @@ const App: React.FC = () => {
   };
 
   const handleStartChapter = () => {
+    audio.playClick();
     setPhase('BRIEFING');
   };
   
   const handleBackToMenu = () => {
+    audio.playClick();
     setPhase('MENU');
     setShowChapterSelect(false);
     setIsDirectiveBurned(false);
@@ -300,6 +377,7 @@ const App: React.FC = () => {
   }, [currentDocIndex, phase, purchasedUpgrades, currentDoc]);
 
   const handleStartDay = () => {
+    audio.playStamp();
     setPhase('WORK');
     setCurrentDocIndex(0);
     setRedactions({});
@@ -312,10 +390,54 @@ const App: React.FC = () => {
     setDailyAuditLogs([]);
     setCitation(null);
     setIsDirectiveBurned(false);
-    saveGame(); // Save on start so we don't lose the day if refreshing
+    
+    // Start Tutorial if Day 1 and not completed
+    if (dayIndex === 0 && !tutorialCompleted) {
+      setTutorialStep(0);
+    } else {
+      setTutorialStep(-1);
+    }
+
+    saveGame(); 
+  };
+  
+  const handleToolSelect = (tool: ToolType) => {
+    audio.playClick();
+    setCurrentTool(tool);
+    
+    // Tutorial Jump: If user picks marker early (Steps 0, 1, 2), jump straight to redaction
+    if (tool === 'marker' && tutorialStep >= 0 && tutorialStep < 3) {
+      setTutorialStep(3);
+    }
+
+    // Tutorial Step 4 -> 5: Select Hand (Transition to Burn or Submit)
+    if (tutorialStep === 4 && tool === 'hand') {
+       // If they already burned the directive, skip the burn instruction (Step 5) and go to Outbox (Step 6)
+       if (isDirectiveBurned) {
+          setTutorialStep(6);
+       } else {
+          setTutorialStep(5);
+       }
+    }
+
+    // New Tool Popup Logic
+    if (tool !== 'hand' && !seenTools.includes(tool)) {
+      // Don't show popup if we are currently in a tutorial step that explains this tool
+      if (tutorialStep >= 0 && tool === 'marker') {
+        const newSeen = [...seenTools, tool];
+        setSeenTools(newSeen);
+        saveGame({ seenTools: newSeen });
+      } else {
+        setActiveToolPopup(tool);
+        const newSeen = [...seenTools, tool];
+        setSeenTools(newSeen);
+        saveGame({ seenTools: newSeen });
+      }
+    }
   };
 
   const finishShop = () => {
+    audio.playClick();
     if (totalFunds < -50) {
       setPhase('GAME_OVER');
       return;
@@ -325,11 +447,6 @@ const App: React.FC = () => {
       const nextDay = dayIndex + 1;
       setDayIndex(nextDay);
       
-      // Update max day reached
-      if (nextDay > maxDayReached) {
-        setMaxDayReached(nextDay);
-      }
-
       const nextChapter = getChapterForDay(nextDay);
       if (nextChapter.number > activeChapter.number) {
          setActiveChapter(nextChapter);
@@ -348,16 +465,35 @@ const App: React.FC = () => {
 
   const handleBuyUpgrade = (type: UpgradeType, cost: number) => {
     if (totalFunds >= cost && !purchasedUpgrades.includes(type)) {
-      setTotalFunds(p => p - cost);
-      setPurchasedUpgrades(p => [...p, type]);
+      audio.playSuccess();
+      const newUpgrades = [...purchasedUpgrades, type];
+      const newFunds = totalFunds - cost;
+      setTotalFunds(newFunds);
+      setPurchasedUpgrades(newUpgrades);
+      saveGame({ funds: newFunds, purchasedUpgrades: newUpgrades });
+    } else {
+      audio.playClick();
     }
   };
 
   const handleDocMouseDown = (e: React.MouseEvent) => {
     if (currentTool !== 'hand' || e.button !== 0) return;
+    audio.playPaperRustle();
     setIsDraggingDoc(true);
     setDocDragRel({ x: e.clientX - docPos.x, y: e.clientY - docPos.y });
     e.stopPropagation();
+  };
+  
+  const handleBurnDirective = () => {
+    setIsDirectiveBurned(true);
+    // Step 5 -> 6: Burn
+    if (tutorialStep === 5) {
+      setTutorialStep(6);
+    }
+    // If they burn it during the intro to it (Step 1), move along immediately
+    if (tutorialStep === 1) {
+      setTutorialStep(2);
+    }
   };
 
   useEffect(() => {
@@ -406,6 +542,8 @@ const App: React.FC = () => {
 
   const handleToggleTokens = (tokenIds: string[]) => {
     if (currentTool === 'stamp' || currentTool === 'void_stamp' || currentTool === 'analyzer' || currentTool === 'omni') return;
+    
+    audio.playMarkerScratch();
 
     if (currentTool === 'eraser') {
       const updateSet = (prev: Record<string, Set<string>>) => {
@@ -420,12 +558,13 @@ const App: React.FC = () => {
     }
 
     if (currentTool === 'marker') {
-      setRedactions(p => { 
-        const s = new Set(p[currentDoc.id]); 
-        const isCurrentlyRedacted = s.has(tokenIds[0]);
-        tokenIds.forEach(id => isCurrentlyRedacted ? s.delete(id) : s.add(id));
-        return { ...p, [currentDoc.id]: s }; 
-      });
+      const currentDocRedactions = redactions[currentDoc.id] || new Set();
+      const newS = new Set(currentDocRedactions);
+      const isCurrentlyRedacted = newS.has(tokenIds[0]);
+      tokenIds.forEach(id => isCurrentlyRedacted ? newS.delete(id) : newS.add(id));
+
+      setRedactions(p => ({ ...p, [currentDoc.id]: newS }));
+      
       const clearOthers = (prev: Record<string, Set<string>>) => {
         const s = new Set(prev[currentDoc.id]); 
         tokenIds.forEach(id => s.delete(id)); 
@@ -433,6 +572,8 @@ const App: React.FC = () => {
       };
       setHighlights(clearOthers);
       setRecovered(clearOthers);
+      
+      // Tutorial Logic Step 3 -> 4 is now handled in useEffect
     } 
     else if (currentTool === 'highlighter') {
       setHighlights(p => { 
@@ -468,6 +609,7 @@ const App: React.FC = () => {
 
   const handleRedactAll = () => {
     if (currentTool === 'void_stamp') {
+       audio.playStamp();
        setVoidedDocs(prev => ({
          ...prev,
          [currentDoc.id]: !prev[currentDoc.id]
@@ -475,6 +617,7 @@ const App: React.FC = () => {
        return;
     }
     if (currentTool === 'stamp') {
+      audio.playStamp();
       const ids = parseDocumentContent(currentDoc.content).map(t => t.id);
       setRedactions(p => ({ ...p, [currentDoc.id]: new Set(ids) }));
       setHighlights(p => ({ ...p, [currentDoc.id]: new Set() }));
@@ -482,9 +625,8 @@ const App: React.FC = () => {
     }
   };
 
-  // --- Auto-Submit Logic (Predictive Algorithm) ---
+  // --- Auto-Submit Logic ---
   useEffect(() => {
-    // Only run if upgrade is purchased, we are in work phase, and document is loaded
     if (!purchasedUpgrades.includes('auto_submit') || phase !== 'WORK' || !currentDoc) return;
 
     const timeout = setTimeout(() => {
@@ -498,17 +640,16 @@ const App: React.FC = () => {
         currentDayConfig.specialDirective
       );
 
-      // Check for perfection (No mistakes AND some targets identified to prevent empty doc submit)
       if (result.mistakes.length === 0 && result.stats.totalSensitive > 0) {
-        // Trigger submit automatically
         submitCurrentDoc();
       }
-    }, 800); // Small delay to let user see their action
+    }, 800); 
 
     return () => clearTimeout(timeout);
   }, [redactions, highlights, recovered, voidedDocs, currentDoc, phase, purchasedUpgrades]);
 
   const submitCurrentDoc = () => {
+    audio.playSuccess();
     const result = calculateScore(
       parseDocumentContent(currentDoc.content), 
       redactions[currentDoc.id] || new Set(), 
@@ -518,6 +659,15 @@ const App: React.FC = () => {
       currentDayConfig.rules,
       currentDayConfig.specialDirective
     );
+    
+    // Tutorial Finish Logic
+    // If user submits document (drags to outbox) at ANY point during tutorial, 
+    // complete the tutorial and move on.
+    if (!tutorialCompleted && tutorialStep !== -1) {
+      setTutorialStep(-1);
+      setTutorialCompleted(true);
+      saveGame({ tutorialCompleted: true });
+    }
 
     const { stats, mistakes, financials, moralChange } = result;
 
@@ -577,33 +727,79 @@ const App: React.FC = () => {
                 }
               ]);
            }
+           
+           // IMMEDIATELY UNLOCK NEXT LEVEL AND SAVE
+           const nextIdx = dayIndex + 1;
+           const newMaxDay = Math.max(maxDayReached, nextIdx);
+           const currentChap = getChapterForDay(dayIndex);
+           const nextChap = getChapterForDay(nextIdx);
+           const newMaxChap = Math.max(maxChapterReached, nextChap.number);
+           
+           setMaxDayReached(newMaxDay);
+           setMaxChapterReached(newMaxChap);
+           
+           // Perform a save including the unlocked day
+           saveGame({ 
+             maxDayReached: newMaxDay, 
+             maxChapterReached: newMaxChap 
+           });
+
            setPhase('EVALUATION');
         }
     }, 100);
   };
 
   const proceedToShop = () => {
+    audio.playClick();
     let deduction = currentExpenses.food + currentExpenses.heat;
     if (currentExpenses.rentDue) {
       deduction += currentExpenses.rent;
     }
-    setTotalFunds(prev => prev - deduction);
+    const newFunds = totalFunds - deduction;
+    setTotalFunds(newFunds);
+    saveGame({ funds: newFunds });
     setPhase('SHOP');
   };
 
   const handleEvaluationNext = () => {
+    audio.playClick();
     const hasKickback = purchasedUpgrades.includes('kickback');
     const kickbackAmount = hasKickback ? 50 : 0;
     
     const deductions = (dailyScore.missed * 10) + (dailyScore.overRedacted * 5) + dailyFinancials.penalty;
     const netPay = dailyFinancials.wage + dailyFinancials.bribe + kickbackAmount - deductions;
-    setTotalFunds(prev => prev + netPay);
+    const newFunds = totalFunds + netPay;
+    setTotalFunds(newFunds);
+    saveGame({ funds: newFunds, moralScore: moralScore });
     setPhase('FEED');
   };
+
+  // --- Dynamic Text for Tutorial Step 4 ---
+  const step4Text = useMemo(() => {
+     if (!currentDoc) return "";
+     const names = currentDocTokens.filter(t => t.type === 'name');
+     const currentRedactions = redactions[currentDoc.id] || new Set();
+     const unredacted = names.filter(t => !currentRedactions.has(t.id));
+     
+     if (unredacted.length > 0) {
+        // Must be the directive target if we are here
+        return "You've left a name visible. This matches your **Secret Directive**. Redact it to be safe, or leave it to earn a bribe. It's your choice.\n\nSelect the **Hand Tool** to proceed.";
+     }
+     return "All names redacted. Good.\n\nNow switch back to the **Hand Tool** so you can move the document.";
+  }, [redactions, currentDocTokens, currentDoc]);
 
   return (
     <div id="desk-container" className="w-screen h-screen bg-[#1c1917] flex items-center justify-center relative overflow-hidden bg-noise shadow-inner">
       <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.6)_100%)]"></div>
+      
+      {/* Mute Button */}
+      <button 
+        onClick={handleToggleMute}
+        className="absolute top-4 right-4 z-[100] p-2 bg-stone-800 border border-stone-600 rounded text-stone-400 hover:text-white hover:border-white transition-colors"
+      >
+        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+      </button>
+
       <div className="z-10 w-full h-full relative">
 
         {phase === 'MENU' && (
@@ -640,7 +836,11 @@ const App: React.FC = () => {
         
         {phase === 'WORK' && currentDoc && (
           <>
-            <DraggableItem initialPos={{ x: 50, y: 50 }}>
+            {activeToolPopup && (
+              <ToolPopup tool={activeToolPopup} onClose={() => setActiveToolPopup(null)} />
+            )}
+
+            <DraggableItem initialPos={{ x: 50, y: 50 }} onDragStart={() => audio.playPaperRustle()}>
                <div className="bg-yellow-200 text-stone-900 p-4 w-64 shadow-lg rotate-[-2deg] font-handwriting transform hover:scale-105 transition-transform duration-300 cursor-pointer">
                   <div className="font-bold text-sm uppercase border-b border-stone-800 pb-1 mb-2 flex justify-between">
                     <span>Day {currentDayConfig.day}</span>
@@ -653,33 +853,71 @@ const App: React.FC = () => {
                     <span>Funds: ${totalFunds}</span>
                     {totalFunds < 20 && <span className="text-red-600 animate-pulse">LOW FUNDS!</span>}
                   </div>
+                  <div className="mt-3 text-[9px] text-stone-600 text-center uppercase tracking-widest font-sans opacity-60">
+                    (You can drag me around the screen)
+                  </div>
                </div>
             </DraggableItem>
 
-            <DraggableItem initialPos={{ x: 50, y: 250 }}>
+            <DraggableItem initialPos={{ x: 50, y: 250 }} onDragStart={() => audio.playPaperRustle()}>
                <div className="bg-[#4a3b32] p-2 rounded shadow-2xl relative w-64 cursor-pointer">
                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-stone-300 rounded shadow-md border-t border-white/50 flex items-center justify-center">
                     <div className="w-12 h-1 bg-black/20 rounded-full"></div>
                  </div>
-                 <div className="bg-white p-4 h-full min-h-[300px] text-[11px] font-typewriter leading-snug">
+                 <div className="bg-white p-4 h-full min-h-[300px] text-[11px] font-typewriter leading-snug flex flex-col">
                    <h3 className="font-bold uppercase underline mb-4 text-center">Protocol: {currentDayConfig.title}</h3>
-                   <ul className="space-y-3 list-disc pl-4">
+                   <ul className="space-y-3 list-disc pl-4 flex-1">
                       {currentDayConfig.rules.map((r, i) => (
                         <li key={i} className={`${r.action === 'highlight' ? 'text-blue-800' : r.action === 'recover' ? 'text-green-700' : 'text-red-900'}`}>
                           {r.description}
                         </li>
                       ))}
                    </ul>
+                   <div className="mt-6 pt-2 border-t border-stone-200 text-[9px] text-stone-400 text-center uppercase tracking-widest font-sans">
+                     (You can drag me around the screen)
+                   </div>
                  </div>
+                 
+                 {/* Step 0: Protocol Tutorial */}
+                 {tutorialStep === 0 && (
+                    <div className="absolute -right-4 top-10 translate-x-full z-[100]">
+                       <TutorialNote 
+                         text="Welcome to the desk, Agent. Start by reviewing your **Protocol**. It tells you exactly what needs to be censored today."
+                         arrow="left"
+                         onNext={() => setTutorialStep(1)}
+                       />
+                    </div>
+                 )}
                </div>
             </DraggableItem>
 
             {currentDayConfig.specialDirective && !isDirectiveBurned && (
-               <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 100 }}>
+               <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 350 }} onDragStart={() => audio.playPaperRustle()}>
                  <BurnableDirective 
                     directive={currentDayConfig.specialDirective}
-                    onBurnComplete={() => setIsDirectiveBurned(true)} 
+                    onBurnComplete={handleBurnDirective} 
                  />
+                 
+                 {/* Step 1: Envelope Intro */}
+                 {tutorialStep === 1 && (
+                    <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
+                      <TutorialNote
+                        text="This **Black Envelope** contains a Special Directive. It offers a bribe to break protocol. It is your choice to follow it or not."
+                        arrow="right"
+                        onNext={() => setTutorialStep(2)}
+                      />
+                    </div>
+                 )}
+                 
+                 {/* Step 5: Burn Envelope */}
+                 {tutorialStep === 5 && (
+                    <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
+                      <TutorialNote
+                        text="We cannot leave a paper trail. Click the **Flame Icon** on the envelope to destroy it."
+                        arrow="right"
+                      />
+                    </div>
+                 )}
                </DraggableItem>
             )}
 
@@ -695,23 +933,45 @@ const App: React.FC = () => {
                  <span className="bg-black text-white px-2 py-1 text-xs font-bold uppercase rounded mt-2">Release to Submit</span>
                </div>
             ) : (
-               <DocumentView 
-                 data={currentDoc} 
-                 rules={currentDayConfig.rules}
-                 redactedIds={redactions[currentDoc.id] || new Set()} 
-                 highlightedIds={highlights[currentDoc.id] || new Set()} 
-                 recoveredIds={recovered[currentDoc.id] || new Set()}
-                 isVoided={voidedDocs[currentDoc.id] || false}
-                 onToggleTokens={handleToggleTokens} 
-                 onRedactAll={handleRedactAll} 
-                 tool={currentTool}
-                 style={{ 
-                   transform: `translate(${docPos.x}px, ${docPos.y}px) scale(${isDraggingDoc ? 1.02 : 1})`,
-                   zIndex: isDraggingDoc ? 50 : 10, 
-                   cursor: currentTool === 'hand' ? (isDraggingDoc ? 'grabbing' : 'grab') : 'default'
-                 }}
-                 onMouseDown={handleDocMouseDown}
-               />
+               <>
+                 <DocumentView 
+                   data={currentDoc} 
+                   rules={currentDayConfig.rules}
+                   redactedIds={redactions[currentDoc.id] || new Set()} 
+                   highlightedIds={highlights[currentDoc.id] || new Set()} 
+                   recoveredIds={recovered[currentDoc.id] || new Set()}
+                   isVoided={voidedDocs[currentDoc.id] || false}
+                   onToggleTokens={handleToggleTokens} 
+                   onRedactAll={handleRedactAll} 
+                   tool={currentTool}
+                   tutorialStep={tutorialStep}
+                   style={{ 
+                     transform: `translate(${docPos.x}px, ${docPos.y}px) scale(${isDraggingDoc ? 1.02 : 1})`,
+                     zIndex: isDraggingDoc ? 50 : 10, 
+                     cursor: currentTool === 'hand' ? (isDraggingDoc ? 'grabbing' : 'grab') : 'default'
+                   }}
+                   onMouseDown={handleDocMouseDown}
+                 />
+                 
+                 {/* Step 3: Redaction Tutorial (Positioned ABOVE document to prevent blocking) */}
+                 {tutorialStep === 3 && (
+                    <div 
+                       className="absolute z-[100] pointer-events-none transition-transform duration-75" 
+                       style={{ 
+                          // Position relative to docPos but offset significantly up and centered
+                          transform: `translate(${docPos.x + 425}px, ${docPos.y - 120}px)`, 
+                       }}
+                    >
+                        <div className="relative -left-1/2 pointer-events-auto">
+                           <TutorialNote 
+                              text="Click on the **highlighted Guest Names** below to redact them."
+                              arrow="down"
+                              style={{ transform: 'rotate(-1deg)' }}
+                           />
+                        </div>
+                    </div>
+                 )}
+               </>
             )}
 
             <div 
@@ -733,11 +993,21 @@ const App: React.FC = () => {
               </div>
             </div>
 
+            {/* Step 6: Outbox Tutorial */}
+            {tutorialStep === 6 && (
+               <div className="absolute right-80 bottom-48 z-[100]">
+                  <TutorialNote
+                     text="Excellent. Now drag the document into the **Outbox** to submit it for filing."
+                     arrow="right"
+                  />
+               </div>
+            )}
+            
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[#2a2522] px-8 pb-4 pt-6 rounded-t-xl shadow-2xl border-t border-white/10 flex gap-4 z-[40]">
                {availableTools.map(t => (
                   <button 
                     key={t} 
-                    onClick={() => setCurrentTool(t as ToolType)} 
+                    onClick={() => handleToolSelect(t as ToolType)} 
                     className={`
                       relative group flex flex-col items-center gap-1 transition-all duration-200
                       ${currentTool === t ? '-translate-y-6 scale-110' : 'hover:-translate-y-2 opacity-70 hover:opacity-100'}
@@ -754,7 +1024,6 @@ const App: React.FC = () => {
                       ${t === 'uv' ? 'bg-purple-900 border-purple-500 text-purple-200' : ''}
                       ${t === 'omni' ? 'bg-stone-100 border-white text-stone-800' : ''}
                       ${t === 'eraser' ? 'bg-pink-300 border-pink-200 text-pink-800' : ''}
-                      ${t === 'analyzer' && <Microscope className="w-6 h-6" />}
                       ${t === 'analyzer' ? 'bg-sky-900 border-cyan-500 text-cyan-200' : ''}
                     `}>
                       {t === 'hand' && <Hand className="w-6 h-6" />}
@@ -774,6 +1043,34 @@ const App: React.FC = () => {
                   </button>
                ))}
             </div>
+
+            {/* Step 2: Toolbox Tutorial - Select Marker */}
+            {tutorialStep === 2 && (
+               <div 
+                 className="absolute bottom-36 left-1/2 z-[100]" 
+                 style={{ transform: 'translateX(32px)' }} 
+               >
+                 <TutorialNote
+                   text="We need to redact names. Select the **Marker Tool**."
+                   arrow="down"
+                   style={{ marginLeft: '-8rem' }}
+                 />
+               </div>
+            )}
+
+            {/* Step 4: Select Hand Tool */}
+            {tutorialStep === 4 && (
+               <div 
+                 className="absolute bottom-36 left-1/2 z-[100]"
+                 style={{ transform: 'translateX(-32px)' }} 
+               >
+                 <TutorialNote
+                   text={step4Text}
+                   arrow="down"
+                   style={{ marginLeft: '-8rem' }} 
+                 />
+               </div>
+            )}
 
             {citation && (
               <div className="absolute bottom-32 right-80 z-[100] animate-slide-up">

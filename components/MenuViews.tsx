@@ -33,7 +33,7 @@ export const MainMenu: React.FC<{
         
         <button 
           onClick={onNewGame}
-          className="group relative px-8 py-3 bg-transparent border border-red-900 text-red-800 hover:bg-red-900 hover:text-white transition-all duration-300"
+          className="group relative px-8 py-3 bg-transparent border border-red-800 text-red-600 hover:bg-red-900 hover:text-white transition-all duration-300"
         >
            <span className="flex items-center justify-center gap-2 font-bold uppercase tracking-widest">
              New Game
@@ -41,12 +41,16 @@ export const MainMenu: React.FC<{
         </button>
       </div>
 
-      <div className="mt-12 flex flex-col items-center gap-2 text-xs text-stone-700 font-mono">
-        <div className="uppercase tracking-[0.2em] opacity-60">
+      <div className="mt-16 flex flex-col items-center gap-3 text-xs font-mono z-20">
+        <div className="uppercase tracking-[0.1em] text-[10px] text-stone-500 font-bold">
           DISCLAIMER: All documents and characters within this simulation are fictitious.
         </div>
-        <div>
+        <div className="text-stone-600 tracking-widest text-[10px]">
           v1.0.5 // UNAUTHORIZED ACCESS PROHIBITED
+        </div>
+        <div className="mt-8 flex flex-col items-center gap-2">
+           <span className="tracking-[0.2em] uppercase font-bold text-sm text-stone-200 drop-shadow-md">A Game by Digital Future Labs</span>
+           <span className="text-[11px] text-stone-500 font-bold">© {new Date().getFullYear()}</span>
         </div>
       </div>
     </div>

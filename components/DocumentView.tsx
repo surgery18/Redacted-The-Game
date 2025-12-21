@@ -13,6 +13,7 @@ interface DocumentViewProps {
   onToggleTokens: (ids: string[]) => void;
   onRedactAll: () => void;
   tool: ToolType;
+  tutorialStep?: number; // New prop to control tutorial highlighting
   isEval?: boolean;
   style?: React.CSSProperties;
   onMouseDown?: (e: React.MouseEvent) => void;
@@ -28,6 +29,7 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
   onToggleTokens,
   onRedactAll,
   tool,
+  tutorialStep,
   isEval = false,
   style,
   onMouseDown
@@ -126,6 +128,9 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
             // OMNI Tool Logic: Highlight if token type matches active rules
             const isOmniTarget = tool === 'omni' && sensitiveTypes.has(token.type);
 
+            // Tutorial Logic: Highlight Guest Names in Step 2 and Step 3
+            const isTutorialTarget = (tutorialStep === 2 || tutorialStep === 3) && token.type === 'name';
+
             const isPartOfHoveredGroup = hoveredToken?.groupId && token.groupId === hoveredToken.groupId;
 
             return (
@@ -161,6 +166,9 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                     : ''}
                   ${isOmniTarget && !isRedacted && !isRecovered && !isHighlighted 
                     ? 'outline outline-2 outline-red-500 bg-red-100/50 text-red-900 font-bold animate-pulse' 
+                    : ''}
+                  ${isTutorialTarget && !isRedacted
+                    ? 'ring-4 ring-yellow-400 ring-offset-2 animate-pulse bg-yellow-100/50 z-50 rounded-sm'
                     : ''}
                 `}
               >
