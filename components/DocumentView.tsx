@@ -1,9 +1,11 @@
+
 import React, { useMemo, useState } from 'react';
-import { DocumentData, Token, TokenType, ToolType } from '../types';
+import { DocumentData, Token, TokenType, ToolType, Rule } from '../types';
 import { parseDocumentContent } from '../utils';
 
 interface DocumentViewProps {
   data: DocumentData;
+  rules: Rule[]; // Added rules prop to calculate Omni highlights
   redactedIds: Set<string>;
   highlightedIds: Set<string>;
   recoveredIds: Set<string>;
@@ -18,6 +20,7 @@ interface DocumentViewProps {
 
 export const DocumentView: React.FC<DocumentViewProps> = ({ 
   data, 
+  rules,
   redactedIds, 
   highlightedIds,
   recoveredIds,
@@ -32,6 +35,19 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
   const tokens = useMemo(() => parseDocumentContent(data.content), [data.content]);
   const [hoveredTokenId, setHoveredTokenId] = useState<string | null>(null);
 
+  // Calculate target types for Omni tool
+  const sensitiveTypes = useMemo(() => {
+    if (tool !== 'omni') return new Set<string>();
+    // Collect all types targeted by rules (redact, highlight, recover, void)
+    const types = new Set<string>();
+    rules.forEach(r => {
+      if (r.action !== 'none') {
+        r.targetTypes.forEach(t => types.add(t));
+      }
+    });
+    return types;
+  }, [rules, tool]);
+
   const cursorClass = tool === 'hand' 
     ? "cursor-grab active:cursor-grabbing"
     : tool === 'marker' 
@@ -40,14 +56,12 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
     ? "stamp-tool" 
     : tool === 'void_stamp' 
     ? "void-tool" 
-    : tool === 'lens'
-    ? "lens-tool"
     : tool === 'analyzer'
-    ? "cursor-crosshair" // Analyzer Cursor
+    ? "cursor-crosshair"
     : tool === 'uv'
     ? "uv-tool"
-    : tool === 'seal'
-    ? "seal-tool"
+    : tool === 'omni'
+    ? "cursor-help"
     : "cursor-default";
 
   const isFullBlackout = useMemo(() => {
@@ -69,7 +83,7 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
         className="relative w-[850px] min-h-[1100px] bg-[#f8f5f2] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform rotate-[0.5deg] paper-texture p-16 text-black font-typewriter text-lg leading-relaxed z-10"
         onClick={() => {
            // Visual shake effect on full stamp or void stamp
-           if ((tool === 'stamp' || tool === 'seal' || tool === 'void_stamp') && !isEval) {
+           if ((tool === 'stamp' || tool === 'void_stamp') && !isEval) {
              const shakeElement = document.getElementById('desk-container');
              shakeElement?.classList.remove('shake');
              void shakeElement?.offsetWidth; // Trigger reflow
@@ -107,8 +121,10 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
             const isWhitespace = token.text.trim() === '';
             
             const isUVActive = tool === 'uv' && hoveredTokenId === token.id;
-            const isLensActive = tool === 'lens' && hoveredTokenId === token.id;
             const isAnalyzerActive = tool === 'analyzer' && hoveredTokenId === token.id;
+            
+            // OMNI Tool Logic: Highlight if token type matches active rules
+            const isOmniTarget = tool === 'omni' && sensitiveTypes.has(token.type);
 
             const isPartOfHoveredGroup = hoveredToken?.groupId && token.groupId === hoveredToken.groupId;
 
@@ -118,10 +134,10 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                 onMouseEnter={() => setHoveredTokenId(token.id)}
                 onMouseLeave={() => setHoveredTokenId(null)}
                 onClick={(e) => {
-                  // Disable interaction if using Hand tool
-                  if (tool === 'hand') return;
+                  // Disable interaction if using Hand tool or Omni tool (Omni is just for viewing)
+                  if (tool === 'hand' || tool === 'omni') return;
 
-                  if (!isEval && !isWhitespace && !['stamp', 'seal', 'lens', 'uv', 'void_stamp', 'analyzer'].includes(tool)) {
+                  if (!isEval && !isWhitespace && !['stamp', 'uv', 'void_stamp', 'analyzer'].includes(tool)) {
                     e.stopPropagation();
                     // Toggle whole group if it exists, otherwise just this token
                     const idsToToggle = token.groupId 
@@ -140,8 +156,11 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                       : isHighlighted 
                         ? 'bg-yellow-200/50 text-black font-bold box-decoration-clone px-0.5 -mx-0.5' 
                         : ''}
-                  ${!isRedacted && isPartOfHoveredGroup && !['stamp', 'seal', 'lens', 'uv', 'void_stamp', 'analyzer'].includes(tool) && tool !== 'hand'
+                  ${!isRedacted && isPartOfHoveredGroup && !['stamp', 'uv', 'void_stamp', 'analyzer', 'omni'].includes(tool) && tool !== 'hand'
                     ? 'bg-stone-300/30' 
+                    : ''}
+                  ${isOmniTarget && !isRedacted && !isRecovered && !isHighlighted 
+                    ? 'outline outline-2 outline-red-500 bg-red-100/50 text-red-900 font-bold animate-pulse' 
                     : ''}
                 `}
               >
@@ -151,13 +170,6 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                 {!isRedacted && isUVActive && token.uvText && (
                   <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-purple-900 text-purple-100 text-[10px] px-3 py-1 rounded shadow-xl whitespace-nowrap uv-reveal border border-purple-500 z-50">
                     HIDDEN: {token.uvText}
-                  </span>
-                )}
-
-                {/* Lens Tool Effect */}
-                {isLensActive && token.metadata && (
-                  <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-stone-800 text-stone-100 text-[10px] px-3 py-1 rounded shadow-xl border border-stone-600 whitespace-nowrap z-50 font-sans tracking-wide">
-                     REGISTRY: {token.metadata}
                   </span>
                 )}
 
@@ -188,8 +200,8 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
         {/* Full Blackout / Stamp Overlay */}
         {isFullBlackout && !isVoided && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40 overflow-hidden mix-blend-multiply">
-            <div className={`stamp-effect border-8 p-10 rounded-xl font-stamp font-bold text-8xl uppercase tracking-[0.2em] rotate-[-25deg] select-none opacity-80 ${tool === 'seal' ? 'border-yellow-700 text-yellow-700' : 'border-red-800 text-red-800'}`}>
-              {tool === 'seal' ? 'SEALED' : 'REDACTED'}
+            <div className={`stamp-effect border-8 p-10 rounded-xl font-stamp font-bold text-8xl uppercase tracking-[0.2em] rotate-[-25deg] select-none opacity-80 border-red-800 text-red-800`}>
+              REDACTED
             </div>
           </div>
         )}

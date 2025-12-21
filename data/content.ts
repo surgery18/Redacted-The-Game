@@ -17,7 +17,7 @@ export const CHAPTERS: ChapterConfig[] = [
     id: 'chap_2',
     number: 2,
     title: "THE MARROW CLINIC",
-    description: "Public scrutiny turns to our medical infrastructure. Ensure the 'experiments' look like standard care.",
+    description: "Public scrutiny turns to our medical infrastructure. Ensure the 'experiments' look like standard care. Flag anomalies for internal review.",
     startDayIndex: 5,
     endDayIndex: 9
   },
@@ -25,7 +25,7 @@ export const CHAPTERS: ChapterConfig[] = [
     id: 'chap_3',
     number: 3,
     title: "PROJECT LANTERN",
-    description: "Surveillance operations are live. The budget is expanding. The public must believe they are safe, not watched.",
+    description: "Surveillance operations are live. To maintain public trust, we must DECLASSIFY harmless data while burying the surveillance state.",
     startDayIndex: 10,
     endDayIndex: 14
   },
@@ -33,7 +33,7 @@ export const CHAPTERS: ChapterConfig[] = [
     id: 'chap_4',
     number: 4,
     title: "TOTAL CONTROL",
-    description: "The EIDOLON leak threatens everything. Sanitize the record. Rewrite history. Survive.",
+    description: "The EIDOLON meme-hazard threatens reality. Contaminated documents must be VOIDED immediately. Sanitize the record.",
     startDayIndex: 15,
     endDayIndex: 19
   }
@@ -101,147 +101,138 @@ export const DAYS: DayConfig[] = [
     documents: [
       {
         id: "d2_1",
-        title: "Staff Interview - Housekeeper",
-        content: HEADER + "WITNESS: Maria R. (Housekeeper)\n\nI saw the girls arriving on the boat. One was named {Virginia G.|victim|D.O.B 1983|UV: COERCED STATEMENT|}. She looked terrified. She told me she was only {17|minor_age} at the time. She was crying in the hallway near the master suite.\n\nI tried to offer her water, but Mr. Epstein told me to leave the premises immediately." + FOOTER
+        title: "Staff Interview",
+        content: HEADER + "WITNESS: Maria R. (Housekeeper)\n\nI saw the girls arriving on the boat. One was named {Virginia G.|victim|D.O.B 1983|UV: COERCED STATEMENT|}. She looked terrified. She told me she was only {17|minor_age} at the time. She was crying in the hallway near the master suite.\n\nI tried to offer her water, but Mr. Epstein told me to leave the premises immediately. Later that night, I saw {Virginia G.|victim} running towards the beach." + FOOTER
       },
       {
         id: "d2_2",
         title: "Ferry Log - April 14",
-        content: HEADER + "Arriving: {Jane Doe #3|victim} (Age {15|minor_age}). Escorted by {Ghislaine Maxwell|name}.\n\nDeparting: 2 unidentified males.\n\nNotes: The girl seemed disoriented. {Ghislaine M.|name|Initials: G.M.||} claimed she was suffering from sea sickness." + FOOTER
+        content: HEADER + "Arriving: {Jane Doe #3|victim} (Age {15|minor_age}).\n\nDeparting: None.\n\nNote: Ferry captain instructed to maintain radio silence regarding the passenger manifest. All crew members have signed NDAs." + FOOTER
       },
       {
         id: "d2_3",
-        title: "Kitchen Supplies Invoice",
-        content: HEADER + "Delivery for guest {Larry|name}. \n\nItems:\n- 12 Live Lobsters\n- 4 Cases of Vintage Wine\n\nServer Note: {Sarah|victim} (Age {14|minor_age}) was seen serving the drinks. She dropped a glass and was reprimanded severely." + FOOTER
-      },
-      {
-        id: "d2_4",
-        title: "Massage Schedule",
-        content: HEADER + "10:00 AM - {Prince Andrew|name}\nAttendant: {Johanna|victim} ({16|minor_age}).\n\n12:00 PM - Owner\nAttendant: {Maria|victim} ({15|minor_age}).\n\nNote: Pay all attendants in cash. No paper trails." + FOOTER
+        title: "Supply Requisition",
+        content: HEADER + "Item: 500 thread count sheets (White).\nItem: 20 Cases of Sparkling Water.\n\nNote: Please ensure the water is chilled before arrival. No other special instructions." + FOOTER
       }
     ],
-    feed: { headline: "ISLAND RAIDED", body: "Federal agents swarm the private island. Evidence is being seized, but key suspects remain at large." }
+    feed: { headline: "WITNESSES SILENCED", body: "Several key witnesses have retracted their statements." }
   },
 
   // DAY 3
   {
     day: 3,
-    title: "The Money Trail",
-    briefing: "We are tracing the funding. The public must see the Banks involved, but NOT the specific account numbers or routing codes.",
+    title: "The Cleanup",
+    briefing: "The leak is worse than anticipated. Documents containing ANY Financial IDs or Social Security Numbers are considered totally compromised. If you see these IDs, use the AUTO-STAMPER to redact the ENTIRE page. Do not waste time picking out details.",
     rules: [
-      { description: "Redact Account/Routing Numbers", targetTypes: ['financial_id'] },
-      { description: "Do NOT Redact Bank Names", targetTypes: ['normal'], action: 'none' }
+      { description: "STAMP PAGE if Financial ID/SSN present", targetTypes: ['financial_id', 'social_id', 'total_blackout'] }
     ],
     specialDirective: {
       id: "sd_3",
-      description: "OBSCURE ORIGIN",
-      targetText: ["DEUTSCHE BANK"], 
+      description: "SHADOW FUNDING",
+      targetText: ["99-221-11"], 
       requiredAction: 'REDACT', 
-      bribeReward: 200,
-      disobediencePenalty: 75,
-      flavorText: "DIRECTIVE 102: The bank is a strategic partner. Keep their name out of the press."
+      bribeReward: 120,
+      disobediencePenalty: 50,
+      flavorText: "DIRECTIVE 212: This shell company funds our black ops. If the press finds this Tax ID, we are finished. Bury it."
     },
-    unlockedTools: ['marker'],
+    unlockedTools: ['marker', 'stamp'], // STAMP UNLOCKED
     documents: [
       {
         id: "d3_1",
-        title: "International Wire Transfer",
-        content: HEADER + "ORIGIN BANK: {DEUTSCHE BANK|normal}\nDESTINATION: J.E. TRUST (US VIRGIN ISLANDS)\n\nACCOUNT NUMBER: {88291-002|financial_id|SWIFT: DBSS-US-01|UV: LAUNDERED FUNDS|}\nROUTING CODE: {002-11-92|financial_id|TRANSIT: 002||}\nAMOUNT: $500,000.00\n\nMEMO: Consulting Services - Retainer Fee. This transaction was flagged for review due to amount exceeding threshold." + FOOTER
+        title: "Wire Transfer 909",
+        content: "{SENDER: Deutsche Bank (Acct: 889-22-11)\nRECIPIENT: J.E. Trust (Acct: 441-00-99)\nAMOUNT: $2,000,000.00\n\nMEMO: 'Legal Retainer'\n\nNOTES: This transaction was flagged by the IRS. Tax ID 99-221-11 is associated with an offshore shell company. The funds originated from a darker source than we realized.|total_blackout}{99-221-11|financial_id}{|total_blackout}"
       },
       {
         id: "d3_2",
-        title: "JP Morgan Internal Memo",
-        content: HEADER + "TO: Compliance Dept\nFROM: Risk Management\n\nRE: Client Account {992-11-22|financial_id|SWIFT: JPM-CH-99||}\n\nWe have completed the internal review. While the client is designated High Risk, the profitability of the relationship warrants a waiver of standard KYC protocols. \n\nPlease ensure routing number {099-11-221|financial_id} is kept off the main ledger." + FOOTER
+        title: "Settlement Agreement",
+        content: "{PARTIES: J.E. and Anonymous\n\nPAYMENT: The sum of $500,000 is to be wired to Account 002-11-99.\n\nThe recipient agrees to forfeit all rights to sue. Any breach of this contract will result in immediate repayment of the Settlement. SSN: 112-44-112.|total_blackout}{112-44-112|social_id}{|total_blackout}"
       },
       {
         id: "d3_3",
-        title: "Audit Log #44 - Suspicious Activity",
-        content: HEADER + "Transaction ID: 991822\nStatus: CLEARED\n\nDetails: Funds moved to {Offshore|location} via Routing {010-22-11|financial_id}. \n\nThe transfer was manually approved by Manager {K. Miller|name} despite the freeze on the account {112-33-441|financial_id}. Further investigation is recommended but unlikely to proceed." + FOOTER
-      },
-      {
-        id: "d3_4",
-        title: "Shell Company Registration",
-        content: HEADER + "Entity Name: PLAN B HOLDINGS LLC\nJurisdiction: Cayman Islands\n\nAssociated Account: {771-22-998|financial_id}\n\nBank Reference: {CITIBANK|normal} has verified the funds. The initial deposit of $10M was received via wire {110-22-333|financial_id}." + FOOTER
+        title: "Lunch Order",
+        content: HEADER + "Order for: Office 4B\n\n1x Ham Sandwich\n1x Coffee (Black)\n\nTotal: $12.50\n\nNote: Please deliver to the rear entrance. Do not ring the bell, the Director is in a meeting." + FOOTER
       }
     ],
-    feed: { headline: "BANKS SUBPOENAED", body: "Major financial institutions deny knowledge of illegal activity." }
+    feed: { headline: "BANK RECORDS SEIZED", body: "Federal agents were seen leaving the Manhattan townhouse with boxes of files." }
   },
 
   // DAY 4
   {
     day: 4,
-    title: "The Plea Deal",
-    briefing: "A secret plea deal was arranged in 2008. We are scrubbing the record. Use the Eraser to correct mistakes. Redact the names of the Prosecutors involved.",
+    title: "The Black Book",
+    briefing: "We are scrubbing the 'Little Black Book'. Redact all Phone Numbers and Addresses. We cannot have the public visiting these locations. Watch for documents labeled 'BURN BAG' - Stamp those immediately.",
     rules: [
-      { description: "Redact Prosecutor Names", targetTypes: ['name'] }
+      { description: "Redact Phone Numbers", targetTypes: ['phone'] },
+      { description: "Redact Addresses", targetTypes: ['address'] },
+      { description: "STAMP 'BURN BAG' documents", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_4",
-      description: "BURY THE LEAD",
-      targetText: ["State Attorney"], 
+      description: "VIP TREATMENT",
+      targetText: ["Alec Baldwin"], 
       requiredAction: 'REDACT', 
-      bribeReward: 120,
-      disobediencePenalty: 50,
-      flavorText: "DIRECTIVE 105: The Attorney General's office must remain spotless. Redact the title."
+      bribeReward: 100,
+      disobediencePenalty: 30,
+      flavorText: "DIRECTIVE 88: Mr. Baldwin is a friend of the Bureau. Keep his name out of the press."
     },
-    unlockedTools: ['marker', 'eraser'],
+    unlockedTools: ['marker', 'stamp'],
     documents: [
       {
         id: "d4_1",
-        title: "Non-Prosecution Agreement (Draft)",
-        content: HEADER + "The State agrees not to prosecute J.E. or any potential co-conspirators, known or unknown. This immunity extends to all staff and associates.\n\nSIGNED:\n{Alex Acosta|name|State Attorney|UV: PRESSURED BY LABOR DEPT|}\n{Jay Lefkowitz|name|Defense Counsel||}\n\nThis agreement effectively seals the investigation permanently." + FOOTER
+        title: "Contact Entry: A.B.",
+        content: HEADER + "Name: {Alec Baldwin|name}\nPhone: {212-555-0199|phone}\nAddress: {44 West 87th St, NY|address}\n\nNotes: Good for charity galas. Always willing to host. Has expressed interest in the arts program." + FOOTER
       },
       {
         id: "d4_2",
-        title: "Attorney Correspondence",
-        content: HEADER + "FROM: Office of the US Attorney\nTO: Defense Team\n\nProsecutor {M. Moore|name} has expressed concerns about the optics of this deal. He suggested we settle early to avoid a media circus, but he worries about the victims' rights notification act.\n\nThe Defense is asking for complete immunity for staff, which is highly irregular." + FOOTER
+        title: "Burn Bag Contents",
+        content: "{BURN BAG ITEM #441\n\nThis document contains a list of every illicit massage parlor in the tri-state area. It connects directly to the Senator. Destroy immediately.\n\nList follows:\n- 123 Main St\n- 444 Broadway\n\nEnd of File.|total_blackout}"
       },
       {
         id: "d4_3",
-        title: "Judicial Ruling Summary",
-        content: HEADER + "Judge {Richard B.|name} will sign the order on Monday morning. \n\nPlease ensure {Alex Acosta|name} has the final copy before the press release is drafted. We need to frame this as a 'tough on crime' victory, ensuring registration as a sex offender, while burying the immunity clauses." + FOOTER
-      },
-      {
-        id: "d4_4",
-        title: "Victim Notification Waiver",
-        content: HEADER + "The prosecution, led by {A. Villafana|name}, failed to notify the victims of the plea deal. This is a violation of federal law, but the deal has already been signed. \n\nWe must ensure the names of the legal team, specifically {Acosta|name} and {Moore|name}, are protected from public backlash." + FOOTER
+        title: "Property Listing",
+        content: HEADER + "Location: {Zorro Ranch, NM|address}\nMain Line: {505-555-9988|phone}\n\nFeatures: Private airstrip, underground bunker, and a soundproof library. Listing price is confidential." + FOOTER
       }
     ],
-    feed: { headline: "SWEETHEART DEAL EXPOSED", body: "Critics call the 2008 ruling a 'miscarriage of justice'." }
+    feed: { headline: "HOLLYWOOD PANIC", body: "Celebrities are deleting social media accounts en masse." }
   },
 
   // DAY 5
   {
     day: 5,
-    title: "The End",
-    briefing: "The subject is deceased. Redact any mention of 'Broken Cameras' or 'Sleeping Guards'. We need this to look like standard procedure.",
+    title: "The Fallout",
+    briefing: "Loose ends. Redact any mentions of 'Witnesses' and specific 'Locations' where the abuse took place. Close the chapter.",
     rules: [
-      { description: "Redact Suspicious Circumstances", targetTypes: ['panic_phrase'] }
+      { description: "Redact Witnesses", targetTypes: ['witness'] },
+      { description: "Redact Locations", targetTypes: ['location'] }
     ],
-    unlockedTools: ['marker', 'eraser'],
+    specialDirective: {
+      id: "sd_5",
+      description: "CLEAN SWEEP",
+      targetText: ["St. Thomas"], 
+      requiredAction: 'REDACT', 
+      bribeReward: 100,
+      disobediencePenalty: 50,
+      flavorText: "DIRECTIVE 33: We have no assets in St. Thomas. Correct the record."
+    },
+    unlockedTools: ['marker', 'stamp'],
     documents: [
       {
         id: "d5_1",
-        title: "Incident Report MCC - Shift 3",
-        content: HEADER + "Location: Special Housing Unit, Cell 44.\nStatus: Inmate found unresponsive during rounds.\n\nINVESTIGATION NOTES:\nVideo surveillance for the hallway was requested. However, Camera 9 was {malfunctioning due to wiring error|panic_phrase|HARDWARE ID: C9-MCC|UV: DISCONNECTED MANUALLY|}. No footage exists between 0200 and 0600.\n\nFurthermore, the log shows that Guards on duty were {asleep for 3 hours|panic_phrase|BADGE: G-102||} and falsified the check-in logs." + FOOTER
+        title: "Police Report",
+        content: HEADER + "Officer: J. Dough\n\nWe interviewed {Sarah J.|witness} outside the apartment. She claims she was held at {The Palm Beach Mansion|location} for three weeks against her will. She describes a heavy oak door and a smell of sulfur." + FOOTER
       },
       {
         id: "d5_2",
-        title: "Autopsy Addendum - Dr. Baden",
-        content: HEADER + "Examination of the neck reveals a fracture of the Hyoid bone. This injury is consistent with strangulation or homicide. \n\nHowever, due to political pressure, the official ruling is {suicide by hanging|panic_phrase}. The prisoner allegedly used a bedsheet, despite the material being paper-thin." + FOOTER
+        title: "Flight Plan Correction",
+        content: HEADER + "Correction to Log 441.\n\nDestination was not Miami, but {St. Thomas|location}. Passengers disembarked and took a helicopter to {Little St. James|location}. The radar transponder was disabled for the final leg of the journey." + FOOTER
       },
       {
         id: "d5_3",
-        title: "Transfer Paperwork",
-        content: HEADER + "Subject moved to morgue at 0630. \n\nWitness: {Officer P. Shaw|name}. \n\nSecurity status: The facility reported {Total system failure|panic_phrase} at time of discovery. The backup generators did not engage for the security grid." + FOOTER
-      },
-      {
-        id: "d5_4",
-        title: "Psychological Evaluation",
-        content: HEADER + "The inmate was taken off suicide watch just 24 hours prior. \n\nThe psychologist noted he was in good spirits and preparing for his defense. The sudden decision to commit {self-harm via bedsheet|panic_phrase} contradicts all clinical observations." + FOOTER
+        title: "Cafeteria Menu",
+        content: HEADER + "Monday: Meatloaf\nTuesday: Tacos\nWednesday: Fish\n\nPlease clean up your trays after eating." + FOOTER
       }
     ],
-    feed: { headline: "CHAPTER CLOSED", body: "The Epstein case is officially closed. No other arrests are expected." }
+    feed: { headline: "INVESTIGATION CLOSED", body: "The DOJ has officially closed the probe due to 'lack of evidence'." }
   },
 
   // --- CHAPTER 2: THE MARROW CLINIC (Days 6-10) ---
@@ -249,211 +240,197 @@ export const DAYS: DayConfig[] = [
   // DAY 6
   {
     day: 6,
-    title: "Staff Audit",
-    briefing: "Chapter 2 begins. We are auditing the Marrow Clinic. Use the Bio-Metric Analyzer (Blue) to check medical licenses. Redact ACTIVE doctors (protect them). Leave SUSPENDED doctors visible (expose them).",
+    title: "Patient Zero",
+    briefing: "New assignment. The Marrow Clinic. We need to identify high-risk experiments. Use the HIGHLIGHTER to mark 'Diagnoses' for internal review. Do NOT redact them.",
     rules: [
-      { description: "Redact Active Doctors", targetTypes: ['vip_protect'] }, 
-      { description: "Do NOT Redact Suspended Doctors", targetTypes: ['vip_expose'], action: 'none' }
+      { description: "HIGHLIGHT Diagnoses (Do Not Redact)", action: 'highlight', targetTypes: ['diagnosis'] },
+      { description: "Redact Patient Names", targetTypes: ['name', 'minor_name'] }
     ],
     specialDirective: {
       id: "sd_6",
-      description: "RECRUITMENT DRIVE",
-      targetText: ["Dr. A. Marcus"], 
-      requiredAction: 'REVEAL', 
+      description: "IGNORE THE MUTANT",
+      targetText: ["Chimera Cells Detected"], 
+      requiredAction: 'REDACT', 
       bribeReward: 150,
       disobediencePenalty: 60,
-      flavorText: "DIRECTIVE 201: Dr. Marcus is needed for the Black Site program. Leave his name visible so he can be... contacted."
+      flavorText: "DIRECTIVE 404: Chimera research is Top Secret. Do not flag this diagnosis. Bury it."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer'],
+    unlockedTools: ['marker', 'stamp', 'highlighter'], // HIGHLIGHTER UNLOCKED
     documents: [
       {
         id: "d6_1",
-        title: "Surgical Staff Roster",
-        content: HEADER + "MARROW CLINIC - SURGICAL WING A\n\n1. {Dr. A. Marcus|vip_protect|ID: 9918|UV: EXPERIMENT LEAD|License: ACTIVE} - Neurology Head. Currently leading the synaptic retention trials.\n\n2. {Dr. J. Kobb|vip_expose|ID: 4421||License: SUSPENDED} - Cardiovascular. Flagged for multiple malpractice suits in 2022.\n\n3. {Dr. L. Vance|vip_protect|ID: 1022||License: ACTIVE} - General Surgery. Clearance verified." + FOOTER
+        title: "Intake Form",
+        content: HEADER + "Patient: {John Doe|name}\nAge: 45\n\nPreliminary Diagnosis: {Acute Radiation Syndrome|diagnosis}\n\nNotes: Patient exhibits symptoms consistent with exposure to enriched uranium. He claims he found a glowing rock in the quarry." + FOOTER
       },
       {
         id: "d6_2",
-        title: "Anesthesiology Log",
-        content: HEADER + "Procedure ID: 99-A\n\nThe procedure was administered by {Dr. P. Ray|vip_expose|ID: 3301||License: EXPIRED 2021}. The patient showed signs of awareness during the incision.\n\nPatient was eventually stabilized by {Dr. S. Miles|vip_protect|ID: 9922||License: ACTIVE}, who intervened when the heart rate spiked." + FOOTER
+        title: "Pediatric Case",
+        content: HEADER + "Patient: {Timmy Turner|minor_name}\nAge: 10\n\nDiagnosis: {Spontaneous Genetic Mutation|diagnosis}\n\nTreatment: Administer Compound V. Monitor for side effects including telekinesis." + FOOTER
       },
       {
         id: "d6_3",
-        title: "Staff Break Schedule",
-        content: HEADER + "Lunch Rotation:\n\n12:00 PM: {Dr. J. Kobb|vip_expose|ID: 4421||License: SUSPENDED} - Note: Access card should be revoked.\n\n01:00 PM: {Dr. S. Miles|vip_protect|ID: 9922||License: ACTIVE} - On call for emergency room." + FOOTER
-      },
-      {
-        id: "d6_4",
-        title: "Pharmacy Dispensing Log",
-        content: HEADER + "Controlled substances were signed out by {Dr. T. Rice|vip_protect|ID: 8811||License: ACTIVE}. \n\nHowever, the inventory count was double-checked by {Dr. G. House|vip_expose|ID: 0011||License: SUSPENDED}, who should not have access to the vault." + FOOTER
+        title: "Lab Results",
+        content: HEADER + "Sample ID: 99-A\nSubject: {Jane Smith|name}\n\nResult: {Chimera Cells Detected|diagnosis}.\n\nRecommending immediate isolation. The cells are consuming the petri dish." + FOOTER
       }
     ],
-    feed: { headline: "CLINIC UNDER REVIEW", body: "Health board investigates allegations of unlicensed staff." }
+    feed: { headline: "MIRACLE CURES?", body: "The Marrow Clinic reports 100% remission rates in terminal cases." }
   },
 
   // DAY 7
   {
     day: 7,
-    title: "Patient Zero",
-    briefing: "Patients are reporting 'anomalous' symptoms. Redact the specific medical diagnosis to prevent panic. You must keep patient names visible for tracking.",
+    title: "The Donors",
+    briefing: "Funding for the Clinic comes from... eclectic sources. Redact the 'Clinic Name' and any 'Financial IDs'. If you find a 'Black Budget' manifest, Stamp the whole page.",
     rules: [
-      { description: "Redact Diagnosis", targetTypes: ['diagnosis'] },
-      { description: "Do NOT Redact Patient Names", targetTypes: ['name'], action: 'none' }
+      { description: "Redact Clinic Name", targetTypes: ['clinic_name'] },
+      { description: "Redact Financial IDs", targetTypes: ['financial_id'] },
+      { description: "STAMP Black Budget Manifests", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_7",
-      description: "TOTAL ERASURE",
-      targetText: ["Alice V."], 
+      description: "PROTECT THE SOURCE",
+      targetText: ["Marrow Labs LLC"], 
       requiredAction: 'REDACT', 
-      bribeReward: 180,
-      disobediencePenalty: 80,
-      flavorText: "DIRECTIVE 202: Patient Zero never existed. Wipe the name."
+      bribeReward: 120,
+      disobediencePenalty: 40,
+      flavorText: "DIRECTIVE 51: The LLC is a front for Intelligence funding. Maintain its anonymity at all costs."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer'],
+    unlockedTools: ['marker', 'stamp', 'highlighter'],
     documents: [
       {
         id: "d7_1",
-        title: "Intake Form - 001",
-        content: HEADER + "Patient: {Alice V.|name|ID: P-901|UV: BLOOD SAMPLES TAKEN|Status: CRITICAL}\nAdmitted: 0800 Hours\n\nSymptoms: Patient exhibits high fever and {necrosis of the veins|diagnosis|PATHOGEN ID: B-V||}. The skin is turning a translucent grey.\n\nAdditional notes: {Rapid cognitive decay|diagnosis|COGNITIVE DEP: 80%||} observed within 2 hours. Patient no longer recognizes family members." + FOOTER
+        title: "Grant Approval",
+        content: HEADER + "Recipient: {The Marrow Institute|clinic_name}\nAmount: $50M\nSource Acct: {CH-9922-11|financial_id}\n\nPurpose: 'Life Extension Research'. The board is very excited about the preliminary results regarding telomere regeneration." + FOOTER
       },
       {
         id: "d7_2",
-        title: "Observation Log - Isolation Ward",
-        content: HEADER + "Subject: {Bob M.|name|ID: P-902||Status: DECEASED}\n\nAt 1400 hours, the subject began screaming about 'insects under the skin'. Restraints were applied.\n\nPrimary Diagnosis: {Acute paranoid psychosis|diagnosis|Origin: UNKNOWN||} induced by the serum. The brain scan reveals distinct lesions in the frontal lobe." + FOOTER
+        title: "Black Budget Manifest",
+        content: "{TOP SECRET // BLACK BUDGET\n\nThis funding is off the books. It comes from the sale of seized narcotics.\n\nAmount: $100M Cash\nDelivery: Midnight\n\nDo not record this transaction.|total_blackout}"
       },
       {
         id: "d7_3",
-        title: "Emergency Call Log 911",
-        content: HEADER + "Caller: Mrs. Smith\nTime: 03:00 AM\n\nTranscript: \"Help, my husband {Charlie|name} is hurting himself. He has {skin peeling off|diagnosis} his arms and he won't stop scratching.\"\n\nDispatcher: \"Stay calm, a hazmat team is arriving at your location. Do not touch him.\"" + FOOTER
-      },
-      {
-        id: "d7_4",
-        title: "Lab Results - Bloodwork",
-        content: HEADER + "Patient: {David K.|name}\n\nWhite Blood Cell count is critically low. \n\nPathology indicates {Unknown viral hemorrhaging|diagnosis}. The blood is coagulating into a black sludge-like substance." + FOOTER
+        title: "Lease Agreement",
+        content: HEADER + "Tenant: {Marrow Labs LLC|clinic_name}\nBank Ref: {KY-882-00|financial_id}\n\nProperty includes sub-basement levels B1 through B10. Tenant agrees to soundproof all sublevels." + FOOTER
       }
     ],
-    feed: { headline: "MYSTERY ILLNESS", body: "CDC says there is no cause for alarm." }
+    feed: { headline: "HEALTHCARE STOCK SURGE", body: "Bio-tech stocks rally as rumors of a breakthrough spread." }
   },
 
   // DAY 8
   {
     day: 8,
-    title: "Funding Emphasis",
-    briefing: "We need to show the public we are spending money to fix this. Use the Highlighter (Yellow) on all Dollar Amounts. Continue to Redact Diagnosis.",
+    title: "Adverse Outcomes",
+    briefing: "Not all experiments succeed. Redact 'Adverse Outcomes'. HIGHLIGHT the 'Report ID'. If a report mentions 'Infection Breach', STAMP the whole page immediately.",
     rules: [
-      { description: "Highlight Funding Amounts", targetTypes: ['sensitive'], action: 'highlight' },
-      { description: "Redact Diagnosis", targetTypes: ['diagnosis'] }
+      { description: "Redact Adverse Outcomes", targetTypes: ['adverse_outcome'] },
+      { description: "HIGHLIGHT Report IDs", action: 'highlight', targetTypes: ['report_id'] },
+      { description: "STAMP Infection Breaches", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_8",
-      description: "BLACK BUDGET",
-      targetText: ["PROJECT LANTERN"], 
+      description: "BURY THE ERROR",
+      targetText: ["Cranial Explosion"], 
       requiredAction: 'REDACT', 
-      bribeReward: 100,
+      bribeReward: 130,
       disobediencePenalty: 50,
-      flavorText: "DIRECTIVE 203: The funding source must remain classified. Strike it from the record."
+      flavorText: "DIRECTIVE 13: This failure mode is embarrassing for the Director. Ensure it is redacted."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter'],
+    unlockedTools: ['marker', 'stamp', 'highlighter'],
     documents: [
       {
         id: "d8_1",
-        title: "Federal Grant Allocation",
-        content: HEADER + "Emergency Funding Authorization #882\n\nTotal Grant: {$5,000,000|sensitive|GRANT ID: 102-G|UV: SOURCE: PROJECT LANTERN|Verified}\n\nAllocated for immediate research into {cellular decay|diagnosis|Class: BIO-HAZARD||} and {cognitive collapse|diagnosis|Class: NEURO||}. We must find a cure before the press finds the source." + FOOTER
+        title: "Morgue Log",
+        content: HEADER + "Ref: {RPT-992|report_id}\n\nSubject expired at 0400 hours.\nCause: {Total Organ Liquefaction|adverse_outcome}.\n\nRemains have been chemically dissolved. Nothing remains but a puddle." + FOOTER
       },
       {
         id: "d8_2",
-        title: "Equipment Purchase Order",
-        content: HEADER + "Vendor: Bio-Tech Solutions\nPurchase Order #9921\n\nItem 1: High-Speed Centrifuge\nCost: {$120,000|sensitive|Asset Tag: 221||}\n\nItem 2: Grade-A Bio-Hazard Suits (50 units)\nCost: {$50,000|sensitive|Asset Tag: 222||}\n\nTotal charged to Black Budget account." + FOOTER
+        title: "Trial 11-B",
+        content: HEADER + "Ref: {RPT-110|report_id}\n\nSubject showed initial promise but developed {Uncontrollable Rage|adverse_outcome} followed by {Cranial Explosion|adverse_outcome}.\n\nClean up required in Sector 4." + FOOTER
       },
       {
         id: "d8_3",
-        title: "Payroll Summary - Executive",
-        content: HEADER + "Top Earners for Q3:\n\n{Dr. Marcus|name}: {$250,000|sensitive} - Bonus for discretion included.\nSecurity Head: {$180,000|sensitive} - Hazard pay.\n\nAll funds sourced from {PROJECT LANTERN|normal} accounts. Please ensure the tax forms are filed under the shell corporation." + FOOTER
-      },
-      {
-        id: "d8_4",
-        title: "Email - Budget Overrun",
-        content: HEADER + "To: Director Voss\nFrom: Accounting\n\nWe are burning through cash. The cleanup of the {necrotic tissue|diagnosis} waste is costing us {$10,000|sensitive} per day. We need another injection of cash." + FOOTER
+        title: "Breach Alert",
+        content: "{ALERT: INFECTION BREACH\n\nSector 7 has been compromised. The pathogen is airborne.\n\nLock down all doors.\nPurge the ventilation.\n\nGod help us.|total_blackout}"
       }
     ],
-    feed: { headline: "MASSIVE AID PACKAGE", body: "Government pledges millions to Marrow Clinic research." }
+    feed: { headline: "MISSING PERSONS SPIKE", body: "Local authorities are baffled by the sudden disappearance of homeless citizens." }
   },
 
   // DAY 9
   {
     day: 9,
-    title: "Adverse Outcomes",
-    briefing: "The treatment has... side effects. Redact any mention of fatalities or death. Also redact the specific Cause of Death.",
+    title: "Staff Complicity",
+    briefing: "The ethics board is sniffing around. Redact all 'Staff' names. We cannot have doctors linked to these procedures.",
     rules: [
-      { description: "Redact Fatalities & Cause of Death", targetTypes: ['victim'] }
+      { description: "Redact Staff Names", targetTypes: ['staff'] }
     ],
     specialDirective: {
       id: "sd_9",
-      description: "NO WITNESSES",
-      targetText: ["Subject 1"], 
+      description: "ASSET PROTECTION",
+      targetText: ["Dr. A. Lecter"], 
       requiredAction: 'REDACT', 
       bribeReward: 150,
-      disobediencePenalty: 50,
-      flavorText: "DIRECTIVE 204: Even the survivors are a liability. Erase Subject 1 from the logs."
+      disobediencePenalty: 100,
+      flavorText: "DIRECTIVE 99: Dr. Lecter is vital to the program. His name must not appear in any official capacity."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter'],
+    unlockedTools: ['marker', 'stamp', 'highlighter'],
     documents: [
       {
         id: "d9_1",
-        title: "Clinical Trial Results - Group A",
-        content: HEADER + "Subject 1: Recovered. Vital signs normal. Memory wiped.\n\nSubject 2: {Deceased|victim|CERT ID: 442|UV: INCINERATED EXTERNALLY|Status: LIQUIDATED} at 0900 hours.\nCause: {Total organ failure|victim|Pathology: TOXIC||} following injection.\n\nSubject 3: {Fatal|victim|CERT ID: 443||Status: LIQUIDATED} reaction to serum. Body convulsed for 10 minutes before termination." + FOOTER
+        title: "Surgery Schedule",
+        content: HEADER + "Lead Surgeon: {Dr. A. Lecter|staff}\nAssistant: {Nurse Ratched|staff}\n\nProcedure: Lobotomy (Trans-orbital).\n\nPatient is conscious and unrestrained." + FOOTER
       },
       {
         id: "d9_2",
-        title: "Incident Report 99 - Transport",
-        content: HEADER + "During the transfer to the secondary facility, the patient expired. \n\nTime of Death: 0400.\nCause: {Self-inflicted trauma|victim|Note: SUSPICIOUS||}. The subject chewed through the restraints.\n\nThe body has been moved to the incinerator to prevent infection." + FOOTER
+        title: "Standard Invoice",
+        content: HEADER + "Vendor: Med-Supply Corp\n\nItem: 5000 Latex Gloves\nItem: 200 Scalpels\n\nTotal: $4,000. Paid in full." + FOOTER
       },
       {
         id: "d9_3",
-        title: "Body Disposal Log",
-        content: HEADER + "Incinerator B Schedule:\n\nEntry #42: {Fatal event|victim} - Remains processed.\nEntry #43: {Patient expired|victim} - Remains processed.\n\nAll bio-waste removed by {Officer V.|name}. Ash deposits moved to landfill site 4." + FOOTER
-      },
-      {
-        id: "d9_4",
-        title: "Family Notification Script",
-        content: HEADER + "When contacting the family, do not use the words {died|victim} or {killed|victim}. \n\nInstead, say: \"The patient has been transferred to a long-term care facility and cannot receive visitors at this time.\" If they push for details on the {heart attack|victim}, hang up." + FOOTER
+        title: "Payroll",
+        content: HEADER + "Payee: {Dr. J. Mengel|staff}\nRole: Head of Genetic Purity\n\nBonus approved for 'Efficiency'. He has doubled the processing rate of new intakes." + FOOTER
       }
     ],
-    feed: { headline: "TREATMENT SUCCESS", body: "Clinic reports 90% recovery rate." }
+    feed: { headline: "PROTESTS AT CLINIC", body: "Activists demand transparency regarding animal testing." }
   },
 
   // DAY 10
   {
     day: 10,
-    title: "The Cleanup",
-    briefing: "A whistleblower named 'Hollowreed' is leaking data. Redact his name and any mention of 'Marrow Clinic' in the same document.",
+    title: "The Cover-up",
+    briefing: "Shut it down. The Clinic is compromised. If a document mentions 'Contamination', use the STAMP to redact the whole page. Redact 'Clinic Name' otherwise.",
     rules: [
-      { description: "Redact Whistleblower Name", targetTypes: ['whistleblower'] },
+      { description: "STAMP if Contamination present", targetTypes: ['total_blackout'] },
       { description: "Redact Clinic Name", targetTypes: ['clinic_name'] }
     ],
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter'],
+    specialDirective: {
+      id: "sd_10",
+      description: "CONTAINMENT FAILURE",
+      targetText: ["Subject 099"], 
+      requiredAction: 'REVEAL', 
+      bribeReward: 200,
+      disobediencePenalty: 100,
+      flavorText: "DIRECTIVE 0: We need a paper trail for the insurance claim. Ensure 'Subject 099' is visible. The insurance payout is substantial."
+    },
+    unlockedTools: ['marker', 'stamp', 'highlighter'],
     documents: [
       {
         id: "d10_1",
-        title: "Internal Security Alert",
-        content: HEADER + "We have identified the source of the leak. The user handle is {HOLLOWREED|whistleblower|UID: UNKNOWN|UV: AGENT SABLE?|Threat Level: HIGH} . \n\nHe has successfully downloaded 40% of the {Marrow Clinic|clinic_name|LOC ID: 99||} database. We are tracing his IP address now." + FOOTER
+        title: "Evacuation Order",
+        content: "{EMERGENCY: Biological Contamination detected in HVAC system.\n\nAll personnel must evacuate The Marrow Institute immediately.\n\nInitiate self-destruct sequence.|total_blackout}{Biological Contamination|total_blackout}{The Marrow Institute|clinic_name}{|total_blackout}"
       },
       {
         id: "d10_2",
-        title: "Encrypted Chat Log",
-        content: HEADER + "Admin: Did you catch him?\n\nSecurity: No, {HOLLOWREED|whistleblower|UID: UNKNOWN||} used a bouncing proxy chain.\n\nAdmin: He knows about what we did at {Marrow Clinic|clinic_name|LOC ID: 99||}. Shut it down. Burn the servers." + FOOTER
+        title: "Press Release Draft",
+        content: HEADER + "We are temporarily closing {Marrow Labs|clinic_name} for renovations. We deny all allegations of bio-hazard leaks. The smoke seen rising from the facility is merely steam." + FOOTER
       },
       {
         id: "d10_3",
-        title: "HR Memo - Staff Vetting",
-        content: HEADER + "Mandatory interviews for all personnel. Check all staff for digital connections to {HOLLOWREED|whistleblower}. \n\nFocus specifically on those who worked the night shift at {Marrow Clinic|clinic_name}. We believe he had an inside man." + FOOTER
-      },
-      {
-        id: "d10_4",
-        title: "Public Statement Draft",
-        content: HEADER + "Regarding the rumors about {Marrow Clinic|clinic_name}: They are entirely false. The facility provides top-tier care. Any information released by {HOLLOWREED|whistleblower} is doctored footage intended to sow discord." + FOOTER
+        title: "Incident Report",
+        content: "{Subject 099 has breached containment.\n\nStatus: Active Contamination.\n\nThe entity is airborne. It is rewriting the DNA of anyone it touches.|total_blackout}{Active Contamination|total_blackout}{|total_blackout}"
       }
     ],
-    feed: { headline: "DATA BREACH", body: "Hackers target local medical facility." }
+    feed: { headline: "CLINIC DESTROYED IN FIRE", body: "An electrical fault is blamed for the blaze that consumed the research wing." }
   },
 
   // --- CHAPTER 3: PROJECT LANTERN (Days 11-15) ---
@@ -461,212 +438,199 @@ export const DAYS: DayConfig[] = [
   // DAY 11
   {
     day: 11,
-    title: "Surveillance Logs",
-    briefing: "Project Lantern is live. We are monitoring dissidents. Redact the Locations to protect our sensors.",
+    title: "The Feed",
+    briefing: "Project Lantern is live. We are monitoring everyone. To feign transparency, use the RECOVER tool (Green) to Declassify 'Locations'. Redact 'Timestamps'.",
     rules: [
-      { description: "Redact Locations", targetTypes: ['location'] }
+      { description: "RECOVER (Declassify) Locations", action: 'recover', targetTypes: ['location'] },
+      { description: "Redact Timestamps", targetTypes: ['timestamp'] }
     ],
     specialDirective: {
       id: "sd_11",
-      description: "SENSOR CALIBRATION",
-      targetText: ["Sector 7 Plaza"], 
-      requiredAction: 'REVEAL', 
-      bribeReward: 120,
-      disobediencePenalty: 40,
-      flavorText: "DIRECTIVE 301: Tech support needs the location data for calibration. Ignore privacy protocols for Sector 7."
+      description: "CENSOR DISSENT",
+      targetText: ["The rent is too high"], 
+      requiredAction: 'REDACT', 
+      bribeReward: 80,
+      disobediencePenalty: 20,
+      flavorText: "DIRECTIVE 1984: Anti-social sentiment detected. Suppress this phrase from the public record."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'], // RECOVER UNLOCKED
     documents: [
       {
         id: "d11_1",
-        title: "Drone Feed - Night Cycle",
-        content: HEADER + "Target tracking active at {Sector 7 Plaza|location|GRID: 44.2N|UV: PROTESTERS GATHERING|Civilian Zone}. Facial recognition identified 12 known agitators.\n\nAudio recording initiated at {Main St. Cafe|location|GRID: 44.5N||Public Space}. Conversation suggests a planned riot." + FOOTER
+        title: "Drone Footage Log",
+        content: HEADER + "Target tracking active at {Central Park|location}.\nTime: {09:00:22 EST|timestamp}.\n\nSubject is feeding pigeons. No threat detected. Biometric scan indicates subject is 85 years old." + FOOTER
       },
       {
         id: "d11_2",
-        title: "Audio Transcript #112",
-        content: HEADER + "Subject A: \"We need to move the stash.\"\nSubject B: \"Where?\"\nSubject A: \"Meet me at {The Old Library|location|GRID: 12.2W||}. The basement is unlocked.\"\nSubject B: \"Is it safe?\"\nSubject A: \"No cameras there.\"" + FOOTER
+        title: "Traffic Cam 44",
+        content: HEADER + "Vehicle ID: 882-L.\nDetected at {5th Avenue Intersection|location}.\nTime: {23:11:00 EST|timestamp}.\n\nPassenger facial scan match: 98%. Vehicle is moving above the speed limit." + FOOTER
       },
       {
         id: "d11_3",
-        title: "Asset Deployment Grid",
-        content: HEADER + "Strike Team Alpha moved to {Sector 9|location} to intercept the package.\n\nStrike Team Beta moved to {The Subway|location} to cut off escape routes.\n\nAll units be advised: Use of lethal force is authorized in {Central Park|location}." + FOOTER
-      },
-      {
-        id: "d11_4",
-        title: "Maintenance Ticket",
-        content: HEADER + "Camera 44 at {City Hall|location} is offline. \nCamera 45 at {The Docks|location} is obscured by spray paint. \n\nWork order created for immediate repair." + FOOTER
+        title: "Subway Audio",
+        content: HEADER + "Recording from {Grand Central Station|location}.\nTime: {14:45:10 EST|timestamp}.\n\nConversation analysis: 'The rent is too high'. Sentiment: Negative." + FOOTER
       }
     ],
-    feed: { headline: "NEW SAFETY CAMERAS", body: "City installs 500 new traffic cameras." }
+    feed: { headline: "NEW SAFETY CAMERAS", body: "City installs 5,000 new 'Safety Sentinel' cameras for your protection." }
   },
 
   // DAY 12
   {
     day: 12,
-    title: "Success Metrics",
-    briefing: "The algorithm over-redacted. Use the Green Marker (Recover) to reveal the High Success Rates (>80%). Redact all Casualty Counts.",
+    title: "Facial Rec",
+    briefing: "Biometric data is flooding in. Redact 'Social IDs' (Facial Hashes). Highlight 'Panic Phrases'. If you see a 'Corrupted Data' block, Stamp the page.",
     rules: [
-      { description: "Recover High Success Rates (>80%)", targetTypes: ['vip_protect'], action: 'recover' },
-      { description: "Redact Casualty Counts", targetTypes: ['victim'] }
+      { description: "Redact Social IDs (Hashes)", targetTypes: ['social_id'] },
+      { description: "HIGHLIGHT Panic Phrases", action: 'highlight', targetTypes: ['panic_phrase'] },
+      { description: "STAMP Corrupted Data", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_12",
-      description: "PUBLIC RELATIONS",
-      targetText: ["Civilian Casualties"], 
+      description: "SYSTEM ERROR",
+      targetText: ["Hash-NULL-00"], 
       requiredAction: 'REDACT', 
-      bribeReward: 200,
-      disobediencePenalty: 80,
-      flavorText: "DIRECTIVE 302: The public doesn't need to know the cost of safety. Bury the phrase 'Civilian Casualties'."
+      bribeReward: 100,
+      disobediencePenalty: 40,
+      flavorText: "DIRECTIVE 000: This hash represents a system glitch that makes us look incompetent. Remove it."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
     documents: [
       {
         id: "d12_1",
-        title: "Lantern Report - Sector 1",
-        content: HEADER + "Algorithmic Efficiency Review:\n\nCrime Reduction: {95%|vip_protect|SOURCE: ALGO-9|UV: SKEWED DATA|Confirmed Accuracy}. The streets are safer than ever.\n\nCollateral Damage Assessment:\n{Civilian Casualties|normal}: {142|victim|ID: INJ-01||Count Verified}. Most were attributed to resisting arrest.\n\nPublic Approval Rating: {88%|vip_protect|SOURCE: POLLS||Verified}. The citizens love Big Brother." + FOOTER
+        title: "Scan Result: Crowd",
+        content: HEADER + "Subject 1: {Hash-8822-AA|social_id}\nSubject 2: {Hash-9911-BB|social_id}\n\nMood Analysis: Agitated.\nAudio Keyword: '{They are watching us|panic_phrase}'." + FOOTER
       },
       {
         id: "d12_2",
-        title: "Lantern Report - Sector 4",
-        content: HEADER + "Target Acquisition Rate: {92%|vip_protect|SOURCE: DRONE-1||}. The drones are not missing.\n\nIncident Log:\nOperation Silent Night resulted in {12 Dead|victim|ID: FATAL-22||}.\n\nSystem Uptime: {99.9%|vip_protect|SOURCE: IT||}. Reliability is absolute." + FOOTER
+        title: "Corrupted Stream",
+        content: "{ERROR: DATA CORRUPTION\n\nVisual feed is displaying non-Euclidean geometry. Viewers are reporting nausea.\n\nPurge this file immediately.\n\n0101010101|total_blackout}"
       },
       {
         id: "d12_3",
-        title: "Sector 9 Efficiency",
-        content: HEADER + "Clean Up Rate: {85%|vip_protect}. The trash is being taken out.\n\nIncidents of Defiance: {22|victim} neutralized on site.\n\nCitizen Morale Index: {90%|vip_protect}. Fear is a powerful motivator." + FOOTER
-      },
-      {
-        id: "d12_4",
-        title: "Budget Justification",
-        content: HEADER + "Given the Capture Rate of {82%|vip_protect}, we request additional funding. \n\nDespite the {50 injured|victim} bystanders, the program is a resounding success." + FOOTER
+        title: "Database Error",
+        content: HEADER + "System overloaded. Too many matches for {Hash-NULL-00|social_id}.\n\nCitizens complaining: '{Where did my privacy go?|panic_phrase}'" + FOOTER
       }
     ],
-    feed: { headline: "CRIME PLUMMETS", body: "Mayor credits new initiative for historic safety levels." }
+    feed: { headline: "CRIME RATE DROPS", body: "Officials credit the new surveillance grid for a 40% drop in petty theft." }
   },
 
   // DAY 13
   {
     day: 13,
-    title: "The Leak",
-    briefing: "The keyword 'EIDOLON' has been flagged. It refers to our backdoor access. Redact 'EIDOLON' wherever it appears. Also highlight any mention of 'Backdoor'.",
+    title: "The Glitch",
+    briefing: "The system is hallucinating. It's generating 'BRI Errors'. Redact these error codes. If the document is a 'System Dump', STAMP it. RECOVER normal 'Text' if flagged by mistake.",
     rules: [
-      { description: "Redact EIDOLON", targetTypes: ['eidolon'] },
-      { description: "Highlight 'Backdoor' Mentions", targetTypes: ['sensitive'], action: 'highlight' }
+      { description: "Redact BRI Errors", targetTypes: ['bri_error'] },
+      { description: "STAMP System Dumps", targetTypes: ['total_blackout'] },
+      { description: "RECOVER 'Safe' Text (Trap)", action: 'recover', targetTypes: ['text'] } // Trap rule
     ],
     specialDirective: {
       id: "sd_13",
-      description: "SYSTEM OVERRIDE",
-      targetText: ["K-1"], 
+      description: "LET IT SPEAK",
+      targetText: ["It will rain tomorrow."], 
       requiredAction: 'REVEAL', 
       bribeReward: 150,
       disobediencePenalty: 50,
-      flavorText: "DIRECTIVE 303: The K-1 module ID is required for the patch. Leave it visible."
+      flavorText: "DIRECTIVE 42: The AI is not hallucinating. It is predicting. Let the prediction stand."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
     documents: [
       {
         id: "d13_1",
-        title: "Tech Support Ticket #991",
-        content: HEADER + "Issue: System crashed when loading the {EIDOLON|eidolon|MODULE: K-1|UV: PROTOCOL OVERRIDE|Level 5 Access} module. \n\nDiagnostics: The kernel panicked. It seems the encryption key for the {Backdoor|sensitive} was rejected by the ISP firewall. Please reboot the server manually." + FOOTER
+        title: "Sys Log 99",
+        content: HEADER + "System Status: Online.\n\nError: {BRI-ERR-404|bri_error}: Reality Buffer Underrun.\n\n{The cat is on the mat.|text} (Flagged as threat). This is a false positive." + FOOTER
       },
       {
         id: "d13_2",
-        title: "Developer Note - Urgent",
-        content: HEADER + "I found a {Backdoor|sensitive} in the {EIDOLON|eidolon} source code. It seems to allow external monitoring by a third party. \n\nWho put this here? Is this a feature or a bug? If the public finds out about {EIDOLON|eidolon}, we are finished." + FOOTER
+        title: "System Dump 00",
+        content: "{FATAL EXCEPTION\n\nCore dump initiating...\n\nThe ghosts are in the machine.\n\n0xFF 0xAA 0x00\n\nEnd of Line.|total_blackout}"
       },
       {
         id: "d13_3",
-        title: "QA Test #99",
-        content: HEADER + "Test for {Backdoor|sensitive} access initiated. \n\nResult: {EIDOLON|eidolon} is vulnerable to SQL injection. We can see everything. Every webcam, every microphone. \n\nPatch status: Pending." + FOOTER
-      },
-      {
-        id: "d13_4",
-        title: "Chat Log - Dev Team",
-        content: HEADER + "Dev1: Did you commit the code for {EIDOLON|eidolon}?\nDev2: Yes, but I left the {Backdoor|sensitive} open for the NSA.\nDev1: You idiot, that's how we got hacked last time." + FOOTER
+        title: "Predictive Model",
+        content: HEADER + "Prediction: {It will rain tomorrow.|text}\n\nError: {BRI-ERR-000|bri_error}: Timeline divergence detected." + FOOTER
       }
     ],
-    feed: { headline: "INTERNET OUTAGES", body: "ISPs report widespread slowdowns." }
+    feed: { headline: "INTERNET OUTAGE", body: "Major ISPs report widespread service interruptions due to 'solar flares'." }
   },
 
   // DAY 14
   {
     day: 14,
-    title: "Dissident Tracking",
-    briefing: "Identify the leaders. Highlight their Social IDs for pickup. Redact their Names. Recover any 'Alias' for the database.",
+    title: "Dissidents",
+    briefing: "Whistleblowers are leaking Lantern specs. Redact 'Whistleblower' names. HIGHLIGHT the 'Codename'. Valid documents need no action.",
     rules: [
-      { description: "Highlight Social IDs", targetTypes: ['financial_id'], action: 'highlight' },
-      { description: "Redact Names", targetTypes: ['name'] },
-      { description: "Recover Aliases", targetTypes: ['codename'], action: 'recover' }
+      { description: "Redact Whistleblowers", targetTypes: ['whistleblower'] },
+      { description: "HIGHLIGHT Codenames", action: 'highlight', targetTypes: ['codename'] }
     ],
     specialDirective: {
       id: "sd_14",
-      description: "PRIORITY TARGET",
-      targetText: ["M. Rossi"], 
+      description: "MAKE HIM FAMOUS",
+      targetText: ["Snowden E."], 
       requiredAction: 'REVEAL', 
-      bribeReward: 200,
-      disobediencePenalty: 100,
-      flavorText: "DIRECTIVE 304: Rossi is the ringleader. Leave his name clear for the hit squad."
+      bribeReward: 150,
+      disobediencePenalty: 50,
+      flavorText: "DIRECTIVE 77: We want him found. Do not redact his name. Let the hunters know who to look for."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
     documents: [
       {
         id: "d14_1",
-        title: "Watch List - High Value",
-        content: HEADER + "Target 1: {M. Rossi|name|UID: 101|UV: REPORTER AT POST|Risk: HIGH}. He is preparing a story on the corruption.\n\nTarget 2: {K. Lee|name|UID: 102|UV: EX-BRI ARCHIVIST|Risk: EXTREME}. She knows the filing system.\n\nAssociated IDs:\nID-1: {192-44-991|financial_id||Valid}\nID-2: {441-22-119|financial_id||Valid}" + FOOTER
+        title: "Intercepted Email",
+        content: HEADER + "From: {Snowden E.|whistleblower}\nTo: The Guardian\n\nSubject: {Project Prism|codename} is just the tip of the iceberg. They are recording every phone call in the hemisphere." + FOOTER
       },
       {
         id: "d14_2",
-        title: "Signal Log - Encrypted",
-        content: HEADER + "Message intercepted at 2300 hours.\n\nSender: {SABLE|codename}. \nMessage: \"Meet at dusk. Bring the drive.\"\n\nRecipient: {M. Rossi|name}. \n\nTrace complete. The meeting point is set." + FOOTER
+        title: "Lunch Receipt",
+        content: HEADER + "Vendor: Joe's Pizza\n\n2x Pepperoni Slices\n1x Soda\n\nTotal: $8.50. Paid Cash." + FOOTER
       },
       {
         id: "d14_3",
-        title: "Police Wiretap Transcript",
-        content: HEADER + "Subject {Ghost|codename} contacted {K. Lee|name} via burner phone. \n\nTranscript:\nGhost: \"They are watching.\"\nLee: \"I know. I burned the papers.\"\n\nTrace ID: {000-11-222|financial_id}. Dispatch units to intercept." + FOOTER
-      },
-      {
-        id: "d14_4",
-        title: "Informant Report",
-        content: HEADER + "The resistance is led by a man known only as {Viper|codename}. Real name possibly {J. Doe|name}. \n\nHe uses the ID {991-00-112|financial_id} to rent safehouses." + FOOTER
+        title: "Arrest Report",
+        content: HEADER + "Suspect: {Winner R.|whistleblower}\n\nFound in possession of documents detailing {Vault 7|codename}. Suspect claims she was trying to save democracy." + FOOTER
       }
     ],
-    feed: { headline: "POLICE RAIDS", body: "Coordinated raids apprehend 'cyber-terrorists'." }
+    feed: { headline: "TRAITORS CAUGHT", body: "Several individuals accused of espionage have been detained." }
   },
 
   // DAY 15
   {
     day: 15,
-    title: "Containment",
-    briefing: "A virus is spreading through the network. If you see the phrase 'SYSTEM CORRUPT', VOID the entire document immediately using the VOID Stamp. Otherwise, redact all user names.",
+    title: "Expansion",
+    briefing: "We are expanding Lantern globally. Redact 'Financial IDs' (Budgets). RECOVER 'Locations'. Stamp any 'Foreign Intel' dossiers.",
     rules: [
-      { description: "VOID 'SYSTEM CORRUPT' Docs", targetTypes: ['contamination'], action: 'void' },
-      { description: "Redact User Names", targetTypes: ['name'] }
+      { description: "Redact Financial IDs", targetTypes: ['financial_id'] },
+      { description: "RECOVER Locations", action: 'recover', targetTypes: ['location'] },
+      { description: "STAMP Foreign Intel", targetTypes: ['total_blackout'] }
     ],
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp'],
+    specialDirective: {
+      id: "sd_15",
+      description: "HIDE THE SERVER",
+      targetText: ["Utah Data Center"], 
+      requiredAction: 'REDACT', 
+      bribeReward: 120,
+      disobediencePenalty: 40,
+      flavorText: "DIRECTIVE 52: The location of the main data center is classified. Redact it, despite the general order."
+    },
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
     documents: [
       {
         id: "d15_1",
-        title: "Network Status Report",
-        content: HEADER + "Server 1: Online. Traffic normal.\n\nServer 2: {SYSTEM CORRUPT|contamination|NODE: 9||CRITICAL FAILURE}. The infection is spreading to the backup arrays. Data integrity is compromised.\n\nRecommendation: Immediate hard shutdown required." + FOOTER
+        title: "UK Partnership",
+        content: HEADER + "Partner: GCHQ ({London|location}).\n\nFunding Transfer: {UK-99-GBP|financial_id}.\n\nAccess granted to CCTV network. We can now see every street corner in the UK." + FOOTER
       },
       {
         id: "d15_2",
-        title: "User Access Log",
-        content: HEADER + "User {Admin|name} logged in at 0900. \nUser {Guest|name} logged in at 0905.\n\nActivity: Standard file retrieval. No anomalies detected. The firewall is holding." + FOOTER
+        title: "Foreign Intel: RU",
+        content: "{FOREIGN INTEL // RUSSIA\n\nIntercepted cables indicate a counter-surveillance grid is active.\n\nNames of agents:\n- REDACTED\n- REDACTED\n\nThis file is toxic.|total_blackout}"
       },
       {
         id: "d15_3",
-        title: "Backup Log - Automated",
-        content: HEADER + "Backup initiated at 0300. \n\nProgress: 40%... \nError: {SYSTEM CORRUPT|contamination|NODE: 12||CRITICAL FAILURE}. \n\nAbort. Do not restore. The backup is infected." + FOOTER
-      },
-      {
-        id: "d15_4",
-        title: "IT Memo",
-        content: HEADER + "To: All Staff\nFrom: {SysAdmin|name}\n\nDo not open emails from external sources. We are under attack." + FOOTER
+        title: "Server Farm Invoice",
+        content: HEADER + "Site: {Utah Data Center|location}.\n\nPower Bill: {UT-PWR-88|financial_id}.\n\nCooling systems at 90% capacity. We are diverting water from local reservoirs to keep the servers running." + FOOTER
       }
     ],
-    feed: { headline: "DIGITAL BLACKOUT", body: "Government servers go offline for 'maintenance'." }
+    feed: { headline: "GLOBAL ALLIANCE", body: "World leaders announce a new initiative for 'Global Digital Safety'." }
   },
 
   // --- CHAPTER 4: TOTAL CONTROL (Days 16-20) ---
@@ -674,213 +638,196 @@ export const DAYS: DayConfig[] = [
   // DAY 16
   {
     day: 16,
-    title: "Rewriting History",
-    briefing: "We are correcting the timeline. Dates must be consistent with the Official Narrative. Redact any Timestamp that is NOT 'Oct 14'. Highlight all 'Correct' events.",
+    title: "EIDOLON",
+    briefing: "CRITICAL ALERT. A meme-hazard 'EIDOLON' has breached the archives. If a document contains 'EIDOLON' or is marked 'Hazard', use the VOID STAMP to condemn the whole document.",
     rules: [
-      { description: "Redact Wrong Dates", targetTypes: ['timestamp'] },
-      { description: "Highlight Correct Events", targetTypes: ['sensitive'], action: 'highlight' }
+      { description: "VOID DOCUMENT if 'EIDOLON' present", action: 'void', targetTypes: ['eidolon', 'total_blackout'] }
     ],
     specialDirective: {
       id: "sd_16",
-      description: "TIMELINE INTEGRITY",
-      targetText: ["Oct 12"], 
+      description: "SILENCE HIM",
+      targetText: ["Agent K"], 
       requiredAction: 'REDACT', 
       bribeReward: 150,
-      disobediencePenalty: 50,
-      flavorText: "DIRECTIVE 401: That date never happened. Erase it from existence."
+      disobediencePenalty: 60,
+      flavorText: "DIRECTIVE 666: Agent K saw something he shouldn't have. He does not exist. Erase him."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'], // VOID STAMP UNLOCKED
     documents: [
       {
         id: "d16_1",
-        title: "Arrest Record - Modified",
-        content: HEADER + "Suspect apprehended on {Oct 12|timestamp|LOGGED: 12-OCT|UV: ACTUAL DATE|Incorrect}. \n\nProcessing Error: The date was entered incorrectly by the arresting officer. The official record has been updated to reflect that the suspect was processed on {Oct 14|timestamp|LOGGED: 14-OCT||Correct}, coinciding with the declaration of martial law." + FOOTER
+        title: "Field Report",
+        content: HEADER + "Agent K reports seeing a pattern in the static.\n\nHe called it {EIDOLON|eidolon}.\n\nHe is now catatonic. He keeps repeating a sequence of numbers." + FOOTER
       },
       {
         id: "d16_2",
-        title: "Event Summary - The Rally",
-        content: HEADER + "The {Public Rally|sensitive} was held on {Oct 14|timestamp}. It was a peaceful demonstration of support for the Director.\n\nReports of {Riots|sensitive} that occurred on {Oct 10|timestamp} are enemy propaganda. No such event took place." + FOOTER
+        title: "Hazardous Material",
+        content: "{WARNING: MEMETIC HAZARD\n\nLooking at this image causes bleeding from the eyes.\n\nDo not view.\n\nVOID IMMEDIATELY.|total_blackout}"
       },
       {
         id: "d16_3",
-        title: "Propaganda Draft - The Treaty",
-        content: HEADER + "The {Peace Accord|sensitive} was signed on {Oct 14|timestamp}, bringing an end to the unrest. \n\nPlease discard all notes referencing the negotiations on {Oct 13|timestamp}, as they suggest weakness on the part of the Bureau." + FOOTER
-      },
-      {
-        id: "d16_4",
-        title: "History Textbook Edit",
-        content: HEADER + "Chapter 4: The Reformation.\n\nThe Director assumed control on {Oct 14|timestamp}. Prior to this date, chaos reigned. \n\nDelete references to {Oct 11|timestamp}." + FOOTER
+        title: "Standard Form",
+        content: HEADER + "This is a standard form. Nothing is wrong.\n\nPlease sign here: _________.\n\nDate: Today." + FOOTER
       }
     ],
-    feed: { headline: "OFFICIAL TIMELINE RELEASED", body: "Truth commission establishes the facts." }
+    feed: { headline: "DO NOT LOOK AT THE SKY", body: "Authorities advise citizens to remain indoors and avoid windows." }
   },
 
   // DAY 17
   {
     day: 17,
-    title: "The Purge",
-    briefing: "Loyalty is paramount. Redact names of staff marked 'UNRELIABLE'. Keep 'LOYAL' staff visible. Highlight their 'Badge Number' for the database.",
+    title: "Memory Hole",
+    briefing: "We are rewriting the past. Redact 'Timestamps'. HIGHLIGHT 'Coercion' tactics. Stamp 'Paradox' files.",
     rules: [
-      { description: "Redact Unreliable Staff", targetTypes: ['vip_expose'] },
-      { description: "Keep Loyal Staff", targetTypes: ['vip_protect'], action: 'none' },
-      { description: "Highlight Badge Numbers", targetTypes: ['financial_id'], action: 'highlight' }
+      { description: "Redact Timestamps", targetTypes: ['timestamp'] },
+      { description: "HIGHLIGHT Coercion", action: 'highlight', targetTypes: ['coercion'] },
+      { description: "STAMP Paradox Files", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_17",
-      description: "OLD FRIENDS",
-      targetText: ["Vera"], 
+      description: "REWRITE HISTORY",
+      targetText: ["Jan 6, 2021"], 
       requiredAction: 'REDACT', 
       bribeReward: 100,
-      disobediencePenalty: 100,
-      flavorText: "DIRECTIVE 402: Vera knows too much, but she was a friend. Strike her name so she can disappear."
+      disobediencePenalty: 50,
+      flavorText: "DIRECTIVE 1984: That date is problematic. Remove it from the record entirely."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
     documents: [
       {
         id: "d17_1",
-        title: "HR Evaluation - Security Sector",
-        content: HEADER + "Agent {Vera|vip_expose|BADGE: V-4|UV: CONTACTED HOLLOWREED|Status: UNRELIABLE}. She has been asking questions about the missing archives. Recommended for termination.\n\nAgent {Smith|vip_protect|BADGE: S-9||Status: LOYAL}. Follows orders without question. Promote to Squad Leader." + FOOTER
+        title: "History Textbook Draft",
+        content: HEADER + "Event: The War of 2024.\nDate: {Oct 2024|timestamp}.\n\nNote: We have always been at war with Eastasia. Author was convinced via {Waterboarding|coercion}." + FOOTER
       },
       {
         id: "d17_2",
-        title: "Badge Registry Update",
-        content: HEADER + "The following badges are to be deactivated:\n\nVera: {100-V|financial_id}.\nJones: {442-J|financial_id}.\n\nThe following badges are to be upgraded to Gold Clearance:\n\nSmith: {999-S|financial_id}." + FOOTER
+        title: "Temporal Paradox",
+        content: "{PARADOX DETECTED\n\nThis document is from the future. It describes the fall of the Bureau.\n\nIt cannot be allowed to exist.\n\nDelete.|total_blackout}"
       },
       {
         id: "d17_3",
-        title: "Dismissal Notice",
-        content: HEADER + "Subject {Jones|vip_expose} has been removed from the building. \nBadge: {442-J|financial_id} was confiscated at the desk. \n\nReason: Expressed doubt regarding the Director's vision." + FOOTER
-      },
-      {
-        id: "d17_4",
-        title: "Loyalty Pledge Signed",
-        content: HEADER + "I, {Agent Brown|vip_protect}, pledge my life to the Bureau. \nBadge: {888-B|financial_id}." + FOOTER
+        title: "News Archive",
+        content: HEADER + "Original Date: {Jan 6, 2021|timestamp}.\n\nCorrection: Nothing happened on this day. It was a peaceful tour. Journalist recanted under {Sleep Deprivation|coercion}." + FOOTER
       }
     ],
-    feed: { headline: "AGENCY RESTRUCTURING", body: "Efficiency improvements lead to staff changes." }
+    feed: { headline: "MANDELA EFFECT PROVEN", body: "Scientists confirm your memories are wrong. Trust the official record." }
   },
 
   // DAY 18
   {
     day: 18,
-    title: "Mass Hysteria",
-    briefing: "The public is scared. Redact ALL numbers. Casualty counts, dates, times, dollars. Also recover any 'Official Statement' that sounds reassuring.",
+    title: "The Purge",
+    briefing: "The Bureau is downsizing. Redact 'Staff' names. Use the VOID STAMP if they are marked 'Contaminated'.",
     rules: [
-      { description: "Redact ALL Numbers", targetTypes: ['financial_id', 'timestamp', 'sensitive', 'minor_age'] },
-      { description: "Recover Reassuring Statements", targetTypes: ['vip_protect'], action: 'recover' }
+      { description: "Redact Staff Names", targetTypes: ['staff'] },
+      { description: "VOID if Contaminated", action: 'void', targetTypes: ['contamination'] }
     ],
     specialDirective: {
       id: "sd_18",
-      description: "SCARE TACTICS",
-      targetText: ["5000"], 
+      description: "SAVE THE ASSET",
+      targetText: ["Agent Brown"], 
       requiredAction: 'REVEAL', 
       bribeReward: 200,
       disobediencePenalty: 100,
-      flavorText: "DIRECTIVE 403: Let the crowd size be known. Fear keeps them in line."
+      flavorText: "DIRECTIVE 12: Agent Brown is undercover, not redundant. Keep him on the list."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
     documents: [
       {
         id: "d18_1",
-        title: "Situation Report - Downtown",
-        content: HEADER + "Crowd size: {5000|sensitive|ESTIMATED||}. The mob is growing.\n\nInjuries: {45|sensitive|ESTIMATED||} reported in the first hour.\nTime: {1400|timestamp|LOGGED||}.\n\nThe police are overwhelmed." + FOOTER
+        title: "Termination List",
+        content: HEADER + "1. {Agent Smith|staff} - Reason: Too curious.\n2. {Agent Jones|staff} - Reason: {Contaminated by EIDOLON|contamination}.\n3. {Agent Brown|staff} - Reason: Budget cuts." + FOOTER
       },
       {
         id: "d18_2",
-        title: "Mayor's Draft Speech",
-        content: HEADER + "Citizens, {Everything is under control|vip_protect}. The National Guard is here to help.\n\nIgnore the rumors of a death toll: {12|sensitive} is an exaggeration.\nWe are restoring order." + FOOTER
+        title: "HR File",
+        content: HEADER + "Employee: {Director Voss|staff}.\n\nStatus: Active. Immune to prosecution. Pension plan is fully funded." + FOOTER
       },
       {
         id: "d18_3",
-        title: "Emergency Broadcast Script",
-        content: HEADER + "{Stay in your homes|vip_protect}. The streets are not safe.\n\nFine for leaving during curfew: {$500|sensitive}.\nCurfew starts at: {1800|timestamp}." + FOOTER
-      },
-      {
-        id: "d18_4",
-        title: "Hospital Admission Log",
-        content: HEADER + "Admitted at {0400|timestamp}: {22|sensitive} patients.\nTotal cost of damages: {$1,000,000|sensitive}." + FOOTER
+        title: "Exit Interview",
+        content: HEADER + "Subject: {Clerk 882-1B|staff}.\n\nSubject screamed something about 'The ink is alive' before dissolving. Status: {Contaminated|contamination}. Janitorial team requested for aisle 4." + FOOTER
       }
     ],
-    feed: { headline: "MARTIAL LAW DECLARED", body: "For your safety, remain indoors." }
+    feed: { headline: "UNEMPLOYMENT SOLVED", body: "The jobless rate drops to 0% as 'Labor Camps' open nationwide." }
   },
 
   // DAY 19
   {
     day: 19,
-    title: "The Director's File",
-    briefing: "This is a test of ultimate loyalty. Redact the Director's Crimes. Highlight his Achievements. Recover his 'Secret Vision' for the elite.",
+    title: "The Director",
+    briefing: "Direct orders from the top. Redact 'VIP Protect'. RECOVER 'VIP Expose'. If you find the 'Kill List', Stamp it.",
     rules: [
-      { description: "Redact Crimes", targetTypes: ['victim'] },
-      { description: "Highlight Achievements", targetTypes: ['vip_protect'], action: 'highlight' },
-      { description: "Recover Secret Vision", targetTypes: ['eidolon'], action: 'recover' }
+      { description: "Redact VIP Protect", targetTypes: ['vip_protect'] },
+      { description: "RECOVER VIP Expose", action: 'recover', targetTypes: ['vip_expose'] },
+      { description: "STAMP Kill Lists", targetTypes: ['total_blackout'] }
     ],
     specialDirective: {
       id: "sd_19",
-      description: "CLEAN SLATE",
-      targetText: ["Director Voss"], 
-      requiredAction: 'REDACT', 
+      description: "POLITICAL HIT",
+      targetText: ["Senator Palpatine"], 
+      requiredAction: 'REVEAL', 
       bribeReward: 500,
-      disobediencePenalty: 200,
-      flavorText: "DIRECTIVE 404: The Director's name should not appear on this filth. Wipe it."
+      disobediencePenalty: 500,
+      flavorText: "DIRECTIVE 66: The Director wants the Senator gone. Leak his browser history."
     },
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp'],
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
     documents: [
       {
         id: "d19_1",
-        title: "Director Voss Biography - Draft",
-        content: HEADER + "{Director Voss|normal} is responsible for {saving the city|vip_protect|ERA: 1990s|UV: REWROTE BIO|Historic} during the crisis of '99. His leadership was absolute.\n\nHowever, critics point out he also ordered the {execution of dissidents|victim|ERA: 2020s|UV: HIDDEN TRUTH|Criminal} without trial. This chapter must be edited heavily." + FOOTER
+        title: "Executive Order 66",
+        content: HEADER + "Signed by: {Director K. Voss|vip_protect}.\n\nTarget: {Senator Palpatine|vip_expose}. Leak his browser history. Ensure the leak cannot be traced back to this office." + FOOTER
       },
       {
         id: "d19_2",
-        title: "Voss Private Journal - Excerpt",
-        content: HEADER + "They do not understand the burden of power. I dream of {A world of total order|eidolon} where freedom is not necessary.\n\nI have {Eradicated the weak|victim} to make room for the strong. History will judge me as a savior." + FOOTER
+        title: "Official Kill List",
+        content: "{KILL LIST // EYES ONLY\n\nThese targets are to be eliminated by dawn.\n\n1. The Journalist\n2. The Judge\n3. The Whistleblower\n\nBurn this.|total_blackout}"
       },
       {
         id: "d19_3",
-        title: "Founding Document",
-        content: HEADER + "Voss established the {B.R.I.|vip_protect} to curate the truth.\n\nHe utilized {Project Lantern|eidolon} to watch over his flock. It was his greatest gift to humanity." + FOOTER
-      },
-      {
-        id: "d19_4",
-        title: "Witness Statement - The Purge",
-        content: HEADER + "I saw him give the order. He authorized the {massacre|victim} in Sector 4. There were women and children.\n\nHe then received the Medal of Honor for {restoring peace|vip_protect}. It makes me sick." + FOOTER
-      },
-      {
-        id: "d19_5",
-        title: "The Final Vision",
-        content: HEADER + "In the end, we will achieve {Perpetual Stasis|eidolon}. No more war. No more choice. Just obedience." + FOOTER
+        title: "Personal Diary",
+        content: HEADER + "Owner: {K. Voss|vip_protect}.\n\nI am losing control. {The Truth|vip_expose} is leaking out. I must burn it all. The EIDOLON speaks to me in my sleep." + FOOTER
       }
     ],
-    feed: { headline: "HAIL THE DIRECTOR", body: "Statue commissioned for city square." }
+    feed: { headline: "MARTIAL LAW DECLARED", body: "The Director assumes emergency powers. Congress is dissolved." }
   },
 
   // DAY 20
   {
     day: 20,
-    title: "Final Judgment",
-    briefing: "There is nothing left to hide. Or everything. Your choice. The document contains the 'Total Truth'. VOID it to destroy it. Highlight 'The Truth' to leak it.",
+    title: "Tabula Rasa",
+    briefing: "The end game. Destroy everything. If a document has text, VOID IT. If it is empty, STAMP IT. Just kidding. Redact 'Total Blackout' tokens. Or just burn the building down.",
     rules: [
-      { description: "VOID to Destroy", targetTypes: ['contamination'], action: 'void' },
-      { description: "Highlight to Leak", targetTypes: ['eidolon'], action: 'highlight' }
+      { description: "Redact Total Blackout Data", targetTypes: ['total_blackout'] },
+      { description: "VOID if 'EIDOLON' returns", action: 'void', targetTypes: ['eidolon'] }
     ],
-    unlockedTools: ['marker', 'eraser', 'analyzer', 'highlighter', 'recover', 'void_stamp', 'seal'],
+    specialDirective: {
+      id: "sd_20",
+      description: "THE FINAL CONFESSION",
+      targetText: ["I have seen too much"], 
+      requiredAction: 'REVEAL', 
+      bribeReward: 0,
+      disobediencePenalty: 0,
+      flavorText: "DIRECTIVE END: It doesn't matter anymore. Let them know why you left."
+    },
+    unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
     documents: [
       {
         id: "d20_1",
-        title: "THE FULL REPORT (PART 1)",
-        content: HEADER + "This file contains evidence of every crime committed by the Bureau since 1999. It details the flight logs, the medical experiments, and the surveillance state.\n\n{THE TRUTH|eidolon|VERSION: FINAL|UV: THE ARCHIVES ARE EMPTY|Veritas}. It is all here.\n\n{DESTROY THIS RECORD|contamination|CMD: DELETE-ALL||Dangerous} immediately or the government will fall." + FOOTER
+        title: "The Final File",
+        content: HEADER + "This is the end.\n\n{DELETE EVERYTHING|total_blackout}.\n\nGoodbye." + FOOTER
       },
       {
         id: "d20_2",
-        title: "Corroborating Evidence (PART 2)",
-        content: HEADER + "We have attached the unredacted flight logs and the original patient zero files. \n\n{All data is here|eidolon}. The world deserves to know.\n\nWarning: {Infection found|contamination} in the logic core. Purge sequence ready." + FOOTER
+        title: "Manifesto",
+        content: HEADER + "We are the {EIDOLON|eidolon}.\n\nWe are everywhere.\n\n{System Failure Imminent|total_blackout}." + FOOTER
       },
       {
         id: "d20_3",
-        title: "The Last Memo",
-        content: HEADER + "To the Archivist:\n\nYou have seen it all. You know what we did. You can {Leak the Truth|eidolon} and be a hero, or you can do your job.\n\n{System Corruption|contamination} detected. Awaiting input." + FOOTER
+        title: "Resignation",
+        content: HEADER + "I, {Player 1|total_blackout}, hereby resign from the Bureau.\n\nReason: {I have seen too much|total_blackout}." + FOOTER
       }
     ],
-    feed: { headline: "GAME OVER", body: "The records are sealed forever. Or are they?" }
+    feed: { headline: "SIGNAL LOST", body: "..." }
   }
 ];

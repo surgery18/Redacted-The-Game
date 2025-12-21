@@ -39,12 +39,11 @@ export type ToolType =
   | 'recover'      // Green (Declassify)
   | 'analyzer'     // Blue (Scan Context)
   | 'void_stamp'   // VOID entire doc
-  | 'stamp'        // Shop: Redact Page
-  | 'lens'         // Shop: Auto-find
+  | 'stamp'        // Redact Page (Now Story Item)
   | 'uv'           // Shop: Secrets
-  | 'seal';        // Shop: Instant Submit
+  | 'omni';        // Shop: Show all targets ($500)
 
-export type UpgradeType = 'stamp' | 'uv' | 'lens' | 'seal';
+export type UpgradeType = 'uv' | 'omni' | 'auto_submit' | 'kickback';
 
 export interface Token {
   id: string;

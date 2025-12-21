@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { DayConfig, GameState, AuditLogEntry, UpgradeType } from '../types';
-import { FileText, ShieldAlert, CheckCircle, Newspaper, Highlighter, PenLine, AlertOctagon, DollarSign, XCircle, AlertTriangle, Skull, Handshake, Flame, ShoppingCart, Coffee, Scan, Sun, Stamp, ShieldCheck, Crown, Eye, ArrowLeft, Paperclip } from 'lucide-react';
+import { FileText, ShieldAlert, CheckCircle, Newspaper, Highlighter, PenLine, AlertOctagon, DollarSign, XCircle, AlertTriangle, Skull, Handshake, Flame, ShoppingCart, Coffee, Scan, Sun, Stamp, ShieldCheck, Crown, Eye, ArrowLeft, Paperclip, Key, Brain, Briefcase } from 'lucide-react';
 
 export const BriefingView: React.FC<{ day: DayConfig; onStart: () => void }> = ({ day, onStart }) => (
   <div className="w-full h-full flex items-center justify-center p-8 bg-black/60 backdrop-blur-sm z-50 animate-slide-up">
@@ -115,11 +115,15 @@ export const EvaluationView: React.FC<{
   score: { correct: number, missed: number, overRedacted: number, totalSensitive: number }; 
   financials: { bribe: number, penalty: number, wage: number };
   totalFunds: number;
+  purchasedUpgrades: UpgradeType[];
   auditLogs?: AuditLogEntry[];
   onNext: () => void;
-}> = ({ score, financials, totalFunds, auditLogs = [], onNext }) => {
+}> = ({ score, financials, totalFunds, purchasedUpgrades, auditLogs = [], onNext }) => {
+  const hasKickback = purchasedUpgrades.includes('kickback');
+  const kickbackAmount = hasKickback ? 50 : 0;
+  
   const deductions = (score.missed * 10) + (score.overRedacted * 5) + financials.penalty;
-  const netPay = financials.wage + financials.bribe - deductions;
+  const netPay = financials.wage + financials.bribe + kickbackAmount - deductions;
   const currentBalance = totalFunds + netPay;
   
   return (
@@ -136,6 +140,15 @@ export const EvaluationView: React.FC<{
             <span className="uppercase text-sm font-bold">Base Wage</span>
             <span className="text-lg text-green-700">+${financials.wage}.00</span>
           </div>
+          
+          {hasKickback && (
+            <div className="flex justify-between items-end border-b border-stone-300 pb-2 bg-stone-200/50 -mx-2 px-2">
+              <span className="uppercase text-sm font-bold text-stone-600 flex items-center gap-1">
+                <Briefcase className="w-4 h-4" /> Shadow Ledger
+              </span>
+              <span className="text-lg text-stone-600">+${kickbackAmount}.00</span>
+            </div>
+          )}
 
           {financials.bribe > 0 && (
             <div className="flex justify-between items-end border-b border-stone-300 pb-2">
@@ -269,11 +282,18 @@ export const ShopView: React.FC<{
   
   const shopItems = [
     { 
-      id: 'stamp' as UpgradeType, 
-      name: 'Auto-Stamper', 
-      price: 150, 
-      icon: <Stamp className="w-8 h-8"/>,
-      desc: 'Instantly redact entire pages. Efficiency is key to survival.' 
+      id: 'omni' as UpgradeType, 
+      name: 'Master Key', 
+      price: 500, 
+      icon: <Key className="w-8 h-8"/>,
+      desc: 'Top-Level clearance override. Visually highlights ALL sensitive data targets on any document.' 
+    },
+    { 
+      id: 'auto_submit' as UpgradeType, 
+      name: 'Predictive Algorithm', 
+      price: 300, 
+      icon: <Brain className="w-8 h-8"/>,
+      desc: 'Neural-net processor. Automatically submits document the instant it is perfectly redacted.' 
     },
     { 
       id: 'uv' as UpgradeType, 
@@ -283,18 +303,11 @@ export const ShopView: React.FC<{
       desc: 'Reveals hidden messages and invisible ink markers on documents.' 
     },
     { 
-      id: 'lens' as UpgradeType, 
-      name: 'Analyst Lens', 
-      price: 175, 
-      icon: <Scan className="w-8 h-8"/>,
-      desc: 'Automated OCR assistance. Highlights 3 sensitive words per document.' 
-    },
-    { 
-      id: 'seal' as UpgradeType, 
-      name: 'The Official Seal', 
-      price: 120, 
-      icon: <ShieldCheck className="w-8 h-8"/>,
-      desc: 'Instantly verify and submit documents without redaction. Risky, but fast.' 
+      id: 'kickback' as UpgradeType, 
+      name: 'Shadow Ledger', 
+      price: 150, 
+      icon: <Briefcase className="w-8 h-8"/>,
+      desc: 'Organized graft. Permanently increases daily wage by $50 through backend channels.' 
     },
   ];
 

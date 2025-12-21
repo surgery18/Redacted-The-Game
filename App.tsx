@@ -6,7 +6,7 @@ import { DocumentView } from './components/DocumentView';
 import { BriefingView, EvaluationView, FeedView, GameOverView, ShopView, VictoryView } from './components/GameViews';
 import { MainMenu, ChapterSelect, ChapterIntro } from './components/MenuViews';
 import { calculateScore, parseDocumentContent } from './utils';
-import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope } from 'lucide-react';
+import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope, Key } from 'lucide-react';
 
 // --- Draggable Helper Component ---
 const DraggableItem: React.FC<{ 
@@ -288,29 +288,15 @@ const App: React.FC = () => {
 
   const availableTools = useMemo(() => {
     const base = ['hand', ...(currentDayConfig.unlockedTools || ['marker'])];
-    if (purchasedUpgrades.includes('stamp')) base.push('stamp');
+    // Check Shop Upgrades
     if (purchasedUpgrades.includes('uv')) base.push('uv');
-    if (purchasedUpgrades.includes('lens')) base.push('lens');
-    if (purchasedUpgrades.includes('seal')) base.push('seal');
+    if (purchasedUpgrades.includes('omni')) base.push('omni'); // Master Key
     return base;
   }, [currentDayConfig, purchasedUpgrades]);
 
   // Initialize Doc Position to Center on load/new doc
   useEffect(() => {
     setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); // approx center for 850x1100 doc
-    
-    if (phase === 'WORK' && purchasedUpgrades.includes('lens')) {
-      const tokens = parseDocumentContent(currentDoc.content);
-      const sensitiveTokens = tokens.filter(t => t.type !== 'normal');
-      const shuffled = sensitiveTokens.sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 3).map(t => t.id);
-      
-      setHighlights(prev => ({
-        ...prev,
-        [currentDoc.id]: new Set([...(prev[currentDoc.id] || []), ...selected])
-      }));
-    }
-
   }, [currentDocIndex, phase, purchasedUpgrades, currentDoc]);
 
   const handleStartDay = () => {
@@ -419,7 +405,7 @@ const App: React.FC = () => {
 
 
   const handleToggleTokens = (tokenIds: string[]) => {
-    if (currentTool === 'seal' || currentTool === 'stamp' || currentTool === 'void_stamp' || currentTool === 'analyzer') return;
+    if (currentTool === 'stamp' || currentTool === 'void_stamp' || currentTool === 'analyzer' || currentTool === 'omni') return;
 
     if (currentTool === 'eraser') {
       const updateSet = (prev: Record<string, Set<string>>) => {
@@ -481,10 +467,6 @@ const App: React.FC = () => {
   };
 
   const handleRedactAll = () => {
-    if (currentTool === 'seal') {
-       submitCurrentDoc();
-       return;
-    }
     if (currentTool === 'void_stamp') {
        setVoidedDocs(prev => ({
          ...prev,
@@ -499,6 +481,32 @@ const App: React.FC = () => {
       setRecovered(p => ({ ...p, [currentDoc.id]: new Set() }));
     }
   };
+
+  // --- Auto-Submit Logic (Predictive Algorithm) ---
+  useEffect(() => {
+    // Only run if upgrade is purchased, we are in work phase, and document is loaded
+    if (!purchasedUpgrades.includes('auto_submit') || phase !== 'WORK' || !currentDoc) return;
+
+    const timeout = setTimeout(() => {
+      const result = calculateScore(
+        parseDocumentContent(currentDoc.content), 
+        redactions[currentDoc.id] || new Set(), 
+        highlights[currentDoc.id] || new Set(),
+        recovered[currentDoc.id] || new Set(), 
+        voidedDocs[currentDoc.id] || false,
+        currentDayConfig.rules,
+        currentDayConfig.specialDirective
+      );
+
+      // Check for perfection (No mistakes AND some targets identified to prevent empty doc submit)
+      if (result.mistakes.length === 0 && result.stats.totalSensitive > 0) {
+        // Trigger submit automatically
+        submitCurrentDoc();
+      }
+    }, 800); // Small delay to let user see their action
+
+    return () => clearTimeout(timeout);
+  }, [redactions, highlights, recovered, voidedDocs, currentDoc, phase, purchasedUpgrades]);
 
   const submitCurrentDoc = () => {
     const result = calculateScore(
@@ -584,8 +592,11 @@ const App: React.FC = () => {
   };
 
   const handleEvaluationNext = () => {
+    const hasKickback = purchasedUpgrades.includes('kickback');
+    const kickbackAmount = hasKickback ? 50 : 0;
+    
     const deductions = (dailyScore.missed * 10) + (dailyScore.overRedacted * 5) + dailyFinancials.penalty;
-    const netPay = dailyFinancials.wage + dailyFinancials.bribe - deductions;
+    const netPay = dailyFinancials.wage + dailyFinancials.bribe + kickbackAmount - deductions;
     setTotalFunds(prev => prev + netPay);
     setPhase('FEED');
   };
@@ -686,6 +697,7 @@ const App: React.FC = () => {
             ) : (
                <DocumentView 
                  data={currentDoc} 
+                 rules={currentDayConfig.rules}
                  redactedIds={redactions[currentDoc.id] || new Set()} 
                  highlightedIds={highlights[currentDoc.id] || new Set()} 
                  recoveredIds={recovered[currentDoc.id] || new Set()}
@@ -740,8 +752,7 @@ const App: React.FC = () => {
                       ${t === 'stamp' ? 'bg-red-800 border-red-600 text-red-100' : ''}
                       ${t === 'void_stamp' ? 'bg-red-950 border-red-800 text-red-500' : ''}
                       ${t === 'uv' ? 'bg-purple-900 border-purple-500 text-purple-200' : ''}
-                      ${t === 'seal' ? 'bg-amber-600 border-amber-300 text-amber-100' : ''}
-                      ${t === 'lens' ? 'bg-stone-200 border-white text-stone-800' : ''}
+                      ${t === 'omni' ? 'bg-stone-100 border-white text-stone-800' : ''}
                       ${t === 'eraser' ? 'bg-pink-300 border-pink-200 text-pink-800' : ''}
                       ${t === 'analyzer' && <Microscope className="w-6 h-6" />}
                       ${t === 'analyzer' ? 'bg-sky-900 border-cyan-500 text-cyan-200' : ''}
@@ -753,13 +764,12 @@ const App: React.FC = () => {
                       {t === 'uv' && <Sun className="w-6 h-6" />}
                       {t === 'stamp' && <Stamp className="w-6 h-6" />}
                       {t === 'void_stamp' && <Ban className="w-6 h-6" />}
-                      {t === 'lens' && <Scan className="w-6 h-6" />}
+                      {t === 'omni' && <Key className="w-6 h-6" />}
                       {t === 'eraser' && <Eraser className="w-6 h-6" />}
-                      {t === 'seal' && <ShieldCheck className="w-6 h-6" />}
                       {t === 'analyzer' && <Microscope className="w-6 h-6" />}
                     </div>
                     <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest bg-black/80 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {t}
+                      {t === 'omni' ? 'Master Key' : t}
                     </span>
                   </button>
                ))}
@@ -790,6 +800,7 @@ const App: React.FC = () => {
                score={dailyScore} 
                financials={dailyFinancials}
                totalFunds={totalFunds}
+               purchasedUpgrades={purchasedUpgrades}
                auditLogs={dailyAuditLogs} 
                onNext={handleEvaluationNext} 
               />
