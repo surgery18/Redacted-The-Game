@@ -41,8 +41,13 @@ export const MainMenu: React.FC<{
         </button>
       </div>
 
-      <div className="mt-12 text-xs text-stone-700 font-mono">
-        v1.0.5 // UNAUTHORIZED ACCESS PROHIBITED
+      <div className="mt-12 flex flex-col items-center gap-2 text-xs text-stone-700 font-mono">
+        <div className="uppercase tracking-[0.2em] opacity-60">
+          DISCLAIMER: All documents and characters within this simulation are fictitious.
+        </div>
+        <div>
+          v1.0.5 // UNAUTHORIZED ACCESS PROHIBITED
+        </div>
       </div>
     </div>
   </div>
