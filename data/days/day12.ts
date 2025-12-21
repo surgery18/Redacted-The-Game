@@ -13,19 +13,19 @@ export const day12: DayConfig = {
   ],
   specialDirective: {
     id: "sd_12",
-    description: "SYSTEM ERROR",
+    description: "SYSTEM REBOOT",
     targetText: ["Hash-NULL"], 
-    requiredAction: 'REDACT', 
+    requiredAction: 'REVEAL', 
     bribeReward: 100,
     disobediencePenalty: 40,
-    flavorText: "DIRECTIVE 000: This hash represents a glitch. Remove it."
+    flavorText: "DIRECTIVE 000: Hash-NULL is a system key. We need it visible to reboot the grid. Do not redact."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
   documents: [
     {
       id: "d12_1",
       title: "Scan Result: Crowd",
-      content: HEADER + "Subject 1: {Hash-8822-AA|social_id}\n\nAudio Keyword: '{They are watching us|panic_phrase}'." + FOOTER
+      content: HEADER + "Subject 1: {Hash-NULL|social_id}\n\nAudio Keyword: '{They are watching us|panic_phrase}'." + FOOTER
     },
     {
       id: "d12_2",

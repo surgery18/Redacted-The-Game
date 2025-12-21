@@ -13,12 +13,12 @@ export const day7: DayConfig = {
   ],
   specialDirective: {
     id: "sd_7",
-    description: "PROTECT THE SOURCE",
-    targetText: ["Marrow Labs LLC"], 
-    requiredAction: 'REDACT', 
+    description: "PUBLIC RELATIONS",
+    targetText: ["Marrow Institute"], 
+    requiredAction: 'REVEAL', 
     bribeReward: 120,
     disobediencePenalty: 40,
-    flavorText: "DIRECTIVE 51: The LLC is a front for Intelligence funding. Maintain its anonymity."
+    flavorText: "DIRECTIVE 51: We need the public to trust the brand. Keep the Institute's name visible to legitimize the funding."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter'],
   documents: [

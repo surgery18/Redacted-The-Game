@@ -13,12 +13,12 @@ export const day19: DayConfig = {
   ],
   specialDirective: {
     id: "sd_19",
-    description: "POLITICAL HIT",
+    description: "ABORT HIT",
     targetText: ["Palpatine"], 
-    requiredAction: 'REVEAL', 
+    requiredAction: 'REDACT', 
     bribeReward: 500,
     disobediencePenalty: 500,
-    flavorText: "DIRECTIVE 66: Leak his browser history."
+    flavorText: "DIRECTIVE 66: The Senator has made a deal. Abort the exposure. Protect his identity."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
   documents: [

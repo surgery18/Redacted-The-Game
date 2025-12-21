@@ -13,19 +13,19 @@ export const day17: DayConfig = {
   ],
   specialDirective: {
     id: "sd_17",
-    description: "REWRITE HISTORY",
+    description: "TRIGGER EVENT",
     targetText: ["Jan 6"], 
-    requiredAction: 'REDACT', 
+    requiredAction: 'REVEAL', 
     bribeReward: 100,
     disobediencePenalty: 50,
-    flavorText: "DIRECTIVE 1984: That date is problematic. Remove it."
+    flavorText: "DIRECTIVE 1984: We need to prove this event happened to trigger the paradox loop. Leave the date visible."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter', 'recover', 'void_stamp'],
   documents: [
     {
       id: "d17_1",
       title: "History Draft",
-      content: HEADER + "Event: The War of 2024.\nDate: {Oct 2024|timestamp}.\n\nAuthor convinced via {Waterboarding|coercion}." + FOOTER
+      content: HEADER + "Event: The War of 2024.\nDate: {Jan 6, 2025|timestamp}.\n\nAuthor convinced via {Waterboarding|coercion}." + FOOTER
     },
     {
       id: "d17_2",

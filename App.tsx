@@ -8,7 +8,95 @@ import { MainMenu, ChapterSelect, ChapterIntro } from './components/MenuViews';
 import { TutorialNote, ToolPopup } from './components/Tutorial';
 import { calculateScore, parseDocumentContent } from './utils';
 import { audio } from './utils/audio';
-import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope, Key, Volume2, VolumeX } from 'lucide-react';
+import { Eraser, PenLine, Highlighter, Scan, Stamp, Search, Sun, ShieldCheck, FileText, GripHorizontal, File, Hand, EyeOff, Flame, CheckSquare, Ban, Microscope, Key, Volume2, VolumeX, Wifi, Battery, Clock, Terminal } from 'lucide-react';
+
+// --- Action Sayings ---
+const SAYINGS: Partial<Record<ToolType, string[]>> = {
+  marker: [
+    "For their own safety.",
+    "Eyes only.",
+    "Nothing to see here.",
+    "Clean.",
+    "Sanitized.",
+    "History is written by us.",
+    "Protect the narrative.",
+    "Silence is golden.",
+    "Necessary measure.",
+    "Redacted.",
+    "They don't need to know.",
+    "Secure.",
+    "Erase the truth.",
+    "Glory to redacted States of America",
+  ],
+  stamp: [
+    "Glory to redacted States of America", 
+    "OFFICIAL BUSINESS",
+    "DENIED",
+    "BUREAUCRACY WINS",
+    "TOTAL CONTAINMENT", 
+    "SECURITY ASSURED",
+    "APPROVED FOR DESTRUCTION",
+    "CASE CLOSED"
+  ],
+  void_stamp: [
+    "IT NEVER HAPPENED",
+    "REALITY ADJUSTED",
+    "NULL AND VOID",
+    "MEMORY HOLED",
+    "PURGED",
+    "EIDOLON CONTAINED",
+    "TIMELINE CORRECTED"
+  ],
+  highlighter: [
+    "Flagged for review.",
+    "Note this.",
+    "Interesting...",
+    "Watch list updated.",
+    "Keeping tabs.",
+    "Context matters."
+  ],
+  recover: [
+    "Declassified.",
+    "Let the truth slip.",
+    "Correction made.",
+    "Revealing...",
+    "Open record.",
+    "Sunlight is the best disinfectant."
+  ],
+  eraser: [
+    "Nevermind.",
+    "Try again.",
+    "Undo.",
+    "Clean slate.",
+    "Rewriting..."
+  ]
+};
+
+// --- Floating Text Component ---
+const FloatingText: React.FC<{ x: number, y: number, text: string, type: ToolType, onComplete: () => void }> = ({ x, y, text, type, onComplete }) => {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 1500);
+    return () => clearTimeout(timer);
+  }, []); // Fixed: Empty dependency array ensures timer runs once on mount and isn't reset by parent updates (like clock)
+
+  let colorClass = "text-stone-300";
+  let fontClass = "font-typewriter";
+  
+  if (type === 'stamp') { colorClass = "text-red-500 font-bold uppercase tracking-widest text-lg"; fontClass = "font-stamp"; }
+  else if (type === 'void_stamp') { colorClass = "text-red-600 font-black uppercase tracking-widest text-xl"; fontClass = "font-stamp"; }
+  else if (type === 'highlighter') { colorClass = "text-yellow-400 font-bold"; }
+  else if (type === 'recover') { colorClass = "text-green-400 font-bold"; }
+  else if (type === 'marker') { colorClass = "text-white bg-black px-1 font-bold"; }
+
+  return (
+    <div 
+      className={`pointer-events-none fixed z-[100] ${colorClass} ${fontClass} animate-slide-up drop-shadow-md whitespace-nowrap`}
+      style={{ left: x, top: y - 20, textShadow: '0 2px 4px rgba(0,0,0,1)' }}
+    >
+      {text}
+    </div>
+  );
+};
 
 // --- Draggable Helper Component ---
 const DraggableItem: React.FC<{ 
@@ -88,7 +176,7 @@ const BurnableDirective: React.FC<{
       {/* Burning Edge Effect Overlay */}
       <div className={`burn-edge ${isBurning ? 'opacity-100' : 'opacity-0'}`}></div>
 
-      {/* Smoke Particles (Only active when burning) */}
+      {/* Smoke Particles */}
       {isBurning && (
         <div className="absolute inset-0 pointer-events-none overflow-visible z-50">
           {[...Array(15)].map((_, i) => (
@@ -118,34 +206,34 @@ const BurnableDirective: React.FC<{
         </div>
       )}
 
-      {/* Content */}
-      <div className={`bg-[#111] border border-stone-700 p-4 shadow-2xl rotate-[3deg] group cursor-pointer transition-transform hover:scale-105 ${isBurning ? 'burning-mask' : ''}`}>
-        <div className="text-stone-500 text-[10px] uppercase font-bold tracking-[0.3em] mb-2 text-center border-b border-stone-800 pb-2">
-           Burn After Reading
+      {/* Content Styled as an Encrypted Note */}
+      <div className={`bg-stone-900 border border-green-900/50 p-4 shadow-2xl rotate-[3deg] group cursor-pointer transition-transform hover:scale-105 ${isBurning ? 'burning-mask' : ''}`}>
+        <div className="text-green-500 text-[10px] uppercase font-tech tracking-[0.3em] mb-2 text-center border-b border-green-900 pb-2">
+           // ENCRYPTED DIRECTIVE
         </div>
-        <div className="text-stone-300 font-typewriter text-xs leading-relaxed">
+        <div className="text-green-400 font-typewriter text-xs leading-relaxed">
            {directive.flavorText}
         </div>
-        <div className="mt-4 flex justify-between text-[10px] uppercase font-bold">
-           <span className="text-green-700">Reward: ${directive.bribeReward}</span>
-           <span className="text-red-700">Refusal: -${directive.disobediencePenalty}</span>
+        <div className="mt-4 flex justify-between text-[10px] uppercase font-bold font-tech">
+           <span className="text-green-300">Credits: {directive.bribeReward}</span>
+           <span className="text-red-500">Fine: {directive.disobediencePenalty}</span>
         </div>
         
-        {/* Drag Hint */}
-        <div className="mt-3 pt-2 border-t border-stone-800 text-[9px] text-stone-600 text-center uppercase tracking-widest font-sans opacity-50">
+        {/* ADDED HINT */}
+        <div className="mt-3 pt-2 border-t border-green-900/30 text-[10px] text-green-400 text-center uppercase tracking-widest font-tech opacity-90">
            (You can drag me around the screen)
         </div>
-
+        
         <div className="absolute -right-2 -top-2">
-           <EyeOff className="w-6 h-6 text-stone-600" />
+           <EyeOff className="w-6 h-6 text-green-700" />
         </div>
 
         {/* Lighter Button */}
         {!isBurning && (
            <button 
              onClick={handleBurn}
-             className="absolute -bottom-4 -right-4 bg-orange-700 hover:bg-orange-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 z-50 group-hover:opacity-100 opacity-0 transition-opacity"
-             title="Burn Evidence"
+             className="absolute -bottom-4 -right-4 bg-red-900 hover:bg-red-700 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 z-50 group-hover:opacity-100 opacity-0 transition-opacity border border-red-500"
+             title="Delete Securely"
            >
              <Flame className="w-4 h-4" fill="white" />
            </button>
@@ -206,6 +294,17 @@ const App: React.FC = () => {
   // Feedback System
   const [citation, setCitation] = useState<Citation | null>(null);
 
+  // Floating Action Text State
+  const [activeSayings, setActiveSayings] = useState<{ id: number, x: number, y: number, text: string, type: ToolType }[]>([]);
+  const sayingIdCounter = useRef(0);
+
+  // Clock
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const currentDayConfig = DAYS[dayIndex] || DAYS[DAYS.length - 1];
   const currentDocs = currentDayConfig.documents;
   const currentDoc = currentDocs[currentDocIndex];
@@ -245,10 +344,8 @@ const App: React.FC = () => {
     const isAllRedacted = unredacted.length === 0;
     
     if (isAllRedacted || isOnlySpecialLeft) {
-       // All done, or only optional target left -> Allow progressing to next step
        if (tutorialStep === 3) setTutorialStep(4);
     } else {
-       // Still have required names -> Go back to step 3 if we were at 4
        if (tutorialStep === 4) setTutorialStep(3);
     }
   }, [redactions, currentDocTokens, tutorialStep, dayIndex, currentDoc, currentDayConfig]);
@@ -365,15 +462,14 @@ const App: React.FC = () => {
 
   const availableTools = useMemo(() => {
     const base = ['hand', ...(currentDayConfig.unlockedTools || ['marker'])];
-    // Check Shop Upgrades
     if (purchasedUpgrades.includes('uv')) base.push('uv');
-    if (purchasedUpgrades.includes('omni')) base.push('omni'); // Master Key
+    if (purchasedUpgrades.includes('omni')) base.push('omni'); 
     return base;
   }, [currentDayConfig, purchasedUpgrades]);
 
   // Initialize Doc Position to Center on load/new doc
   useEffect(() => {
-    setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); // approx center for 850x1100 doc
+    setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); 
   }, [currentDocIndex, phase, purchasedUpgrades, currentDoc]);
 
   const handleStartDay = () => {
@@ -391,7 +487,6 @@ const App: React.FC = () => {
     setCitation(null);
     setIsDirectiveBurned(false);
     
-    // Start Tutorial if Day 1 and not completed
     if (dayIndex === 0 && !tutorialCompleted) {
       setTutorialStep(0);
     } else {
@@ -405,14 +500,11 @@ const App: React.FC = () => {
     audio.playClick();
     setCurrentTool(tool);
     
-    // Tutorial Jump: If user picks marker early (Steps 0, 1, 2), jump straight to redaction
     if (tool === 'marker' && tutorialStep >= 0 && tutorialStep < 3) {
       setTutorialStep(3);
     }
 
-    // Tutorial Step 4 -> 5: Select Hand (Transition to Burn or Submit)
     if (tutorialStep === 4 && tool === 'hand') {
-       // If they already burned the directive, skip the burn instruction (Step 5) and go to Outbox (Step 6)
        if (isDirectiveBurned) {
           setTutorialStep(6);
        } else {
@@ -420,9 +512,7 @@ const App: React.FC = () => {
        }
     }
 
-    // New Tool Popup Logic
     if (tool !== 'hand' && !seenTools.includes(tool)) {
-      // Don't show popup if we are currently in a tutorial step that explains this tool
       if (tutorialStep >= 0 && tool === 'marker') {
         const newSeen = [...seenTools, tool];
         setSeenTools(newSeen);
@@ -486,14 +576,25 @@ const App: React.FC = () => {
   
   const handleBurnDirective = () => {
     setIsDirectiveBurned(true);
-    // Step 5 -> 6: Burn
     if (tutorialStep === 5) {
       setTutorialStep(6);
     }
-    // If they burn it during the intro to it (Step 1), move along immediately
     if (tutorialStep === 1) {
       setTutorialStep(2);
     }
+  };
+
+  // --- Floating Action Text Helper ---
+  const triggerSaying = (x: number, y: number, tool: ToolType) => {
+    const list = SAYINGS[tool];
+    if (!list || list.length === 0) return;
+    const text = list[Math.floor(Math.random() * list.length)];
+    const id = sayingIdCounter.current++;
+    setActiveSayings(prev => [...prev, { id, x, y, text, type: tool }]);
+  };
+
+  const removeSaying = (id: number) => {
+    setActiveSayings(prev => prev.filter(s => s.id !== id));
   };
 
   useEffect(() => {
@@ -540,10 +641,11 @@ const App: React.FC = () => {
   }, [isDraggingDoc, docDragRel, isHoveringOutbox]);
 
 
-  const handleToggleTokens = (tokenIds: string[]) => {
+  const handleToggleTokens = (tokenIds: string[], e: React.MouseEvent) => {
     if (currentTool === 'stamp' || currentTool === 'void_stamp' || currentTool === 'analyzer' || currentTool === 'omni') return;
     
     audio.playMarkerScratch();
+    triggerSaying(e.clientX, e.clientY, currentTool);
 
     if (currentTool === 'eraser') {
       const updateSet = (prev: Record<string, Set<string>>) => {
@@ -572,8 +674,6 @@ const App: React.FC = () => {
       };
       setHighlights(clearOthers);
       setRecovered(clearOthers);
-      
-      // Tutorial Logic Step 3 -> 4 is now handled in useEffect
     } 
     else if (currentTool === 'highlighter') {
       setHighlights(p => { 
@@ -607,9 +707,10 @@ const App: React.FC = () => {
     }
   };
 
-  const handleRedactAll = () => {
+  const handleRedactAll = (e: React.MouseEvent) => {
     if (currentTool === 'void_stamp') {
        audio.playStamp();
+       triggerSaying(e.clientX, e.clientY, currentTool);
        setVoidedDocs(prev => ({
          ...prev,
          [currentDoc.id]: !prev[currentDoc.id]
@@ -618,6 +719,7 @@ const App: React.FC = () => {
     }
     if (currentTool === 'stamp') {
       audio.playStamp();
+      triggerSaying(e.clientX, e.clientY, currentTool);
       const ids = parseDocumentContent(currentDoc.content).map(t => t.id);
       setRedactions(p => ({ ...p, [currentDoc.id]: new Set(ids) }));
       setHighlights(p => ({ ...p, [currentDoc.id]: new Set() }));
@@ -660,9 +762,6 @@ const App: React.FC = () => {
       currentDayConfig.specialDirective
     );
     
-    // Tutorial Finish Logic
-    // If user submits document (drags to outbox) at ANY point during tutorial, 
-    // complete the tutorial and move on.
     if (!tutorialCompleted && tutorialStep !== -1) {
       setTutorialStep(-1);
       setTutorialCompleted(true);
@@ -728,7 +827,6 @@ const App: React.FC = () => {
               ]);
            }
            
-           // IMMEDIATELY UNLOCK NEXT LEVEL AND SAVE
            const nextIdx = dayIndex + 1;
            const newMaxDay = Math.max(maxDayReached, nextIdx);
            const currentChap = getChapterForDay(dayIndex);
@@ -738,7 +836,6 @@ const App: React.FC = () => {
            setMaxDayReached(newMaxDay);
            setMaxChapterReached(newMaxChap);
            
-           // Perform a save including the unlocked day
            saveGame({ 
              maxDayReached: newMaxDay, 
              maxChapterReached: newMaxChap 
@@ -774,7 +871,6 @@ const App: React.FC = () => {
     setPhase('FEED');
   };
 
-  // --- Dynamic Text for Tutorial Step 4 ---
   const step4Text = useMemo(() => {
      if (!currentDoc) return "";
      const names = currentDocTokens.filter(t => t.type === 'name');
@@ -782,103 +878,141 @@ const App: React.FC = () => {
      const unredacted = names.filter(t => !currentRedactions.has(t.id));
      
      if (unredacted.length > 0) {
-        // Must be the directive target if we are here
         return "You've left a name visible. This matches your **Secret Directive**. Redact it to be safe, or leave it to earn a bribe. It's your choice.\n\nSelect the **Hand Tool** to proceed.";
      }
      return "All names redacted. Good.\n\nNow switch back to the **Hand Tool** so you can move the document.";
   }, [redactions, currentDocTokens, currentDoc]);
 
   return (
-    <div id="desk-container" className="w-screen h-screen bg-[#1c1917] flex items-center justify-center relative overflow-hidden bg-noise shadow-inner">
-      <div className="absolute inset-0 pointer-events-none z-50 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,0.6)_100%)]"></div>
+    <div className="monitor-screen font-typewriter">
+      {/* CRT Effects */}
+      <div className="crt-scanlines"></div>
+      <div className="crt-vignette"></div>
+      <div className="crt-flicker absolute inset-0 pointer-events-none mix-blend-overlay bg-blue-900/5"></div>
       
-      {/* Mute Button */}
-      <button 
-        onClick={handleToggleMute}
-        className="absolute top-4 right-4 z-[100] p-2 bg-stone-800 border border-stone-600 rounded text-stone-400 hover:text-white hover:border-white transition-colors"
-      >
-        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-      </button>
+      {/* OS System Bar */}
+      <div className="h-8 bg-[#0d0f14] border-b border-stone-800 flex items-center justify-between px-4 text-xs font-tech text-stone-400 z-50 relative">
+         <div className="flex items-center gap-4">
+            <span className="font-bold text-stone-200 tracking-wider">BUREAU_OS v4.1</span>
+            <span className="flex items-center gap-2"><Terminal size={12}/> CONNECTED: SECURE_NODE_99</span>
+         </div>
+         <div className="flex items-center gap-4">
+            <span className="flex items-center gap-2"><Wifi size={12}/> SIGNAL_STRONG</span>
+            <span className="flex items-center gap-2"><Battery size={12}/> POWER_OPTIMAL</span>
+            <span className="flex items-center gap-2 text-stone-200"><Clock size={12}/> {time.toLocaleTimeString()}</span>
+         </div>
+      </div>
 
-      <div className="z-10 w-full h-full relative">
+      <div id="desk-container" className="w-full h-[calc(100vh-2rem)] bg-digital-grid relative overflow-hidden">
+      
+        {/* Mute Button */}
+        <button 
+          onClick={handleToggleMute}
+          className="absolute top-4 right-4 z-[100] p-2 bg-black/50 border border-stone-700 rounded text-stone-400 hover:text-white hover:border-white transition-colors"
+        >
+          {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+        </button>
 
-        {phase === 'MENU' && (
-          <div className="absolute inset-0 z-50">
-            {showChapterSelect ? (
-              <ChapterSelect 
-                chapters={CHAPTERS}
-                maxChapterReached={maxChapterReached}
-                maxDayReached={maxDayReached}
-                onSelectDay={handleSelectDay}
-                onBack={() => setShowChapterSelect(false)}
-              />
-            ) : (
-              <MainMenu 
-                onNewGame={handleNewGame}
-                onContinue={handleContinue}
-                canContinue={!!localStorage.getItem('redacted_save')}
-              />
-            )}
-          </div>
-        )}
+        <div className="z-10 w-full h-full relative">
 
-        {phase === 'CHAPTER_INTRO' && (
-           <div className="absolute inset-0 z-50">
-             <ChapterIntro chapter={activeChapter} onContinue={handleStartChapter} />
-           </div>
-        )}
-        
-        {phase === 'BRIEFING' && (
-          <div className="absolute inset-0 flex items-center justify-center z-50">
-            <BriefingView day={currentDayConfig} onStart={handleStartDay} />
-          </div>
-        )}
-        
-        {phase === 'WORK' && currentDoc && (
-          <>
-            {activeToolPopup && (
-              <ToolPopup tool={activeToolPopup} onClose={() => setActiveToolPopup(null)} />
-            )}
+          {phase === 'MENU' && (
+            <div className="absolute inset-0 z-50">
+              {showChapterSelect ? (
+                <ChapterSelect 
+                  chapters={CHAPTERS}
+                  maxChapterReached={maxChapterReached}
+                  maxDayReached={maxDayReached}
+                  onSelectDay={handleSelectDay}
+                  onBack={() => setShowChapterSelect(false)}
+                />
+              ) : (
+                <MainMenu 
+                  onNewGame={handleNewGame}
+                  onContinue={handleContinue}
+                  canContinue={!!localStorage.getItem('redacted_save')}
+                />
+              )}
+            </div>
+          )}
 
-            <DraggableItem initialPos={{ x: 50, y: 50 }} onDragStart={() => audio.playPaperRustle()}>
-               <div className="bg-yellow-200 text-stone-900 p-4 w-64 shadow-lg rotate-[-2deg] font-handwriting transform hover:scale-105 transition-transform duration-300 cursor-pointer">
-                  <div className="font-bold text-sm uppercase border-b border-stone-800 pb-1 mb-2 flex justify-between">
-                    <span>Day {currentDayConfig.day}</span>
-                    <span>Stack: {currentDocIndex + 1}/{currentDocs.length}</span>
-                  </div>
-                  <div className="text-xs leading-tight font-serif italic opacity-80">
-                    "{currentDayConfig.briefing.slice(0, 80)}..."
-                  </div>
-                  <div className="mt-4 pt-2 border-t border-stone-400/50 flex justify-between items-center text-xs font-bold">
-                    <span>Funds: ${totalFunds}</span>
-                    {totalFunds < 20 && <span className="text-red-600 animate-pulse">LOW FUNDS!</span>}
-                  </div>
-                  <div className="mt-3 text-[9px] text-stone-600 text-center uppercase tracking-widest font-sans opacity-60">
-                    (You can drag me around the screen)
-                  </div>
-               </div>
-            </DraggableItem>
+          {phase === 'CHAPTER_INTRO' && (
+             <div className="absolute inset-0 z-50">
+               <ChapterIntro chapter={activeChapter} onContinue={handleStartChapter} />
+             </div>
+          )}
+          
+          {phase === 'BRIEFING' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50">
+              <BriefingView day={currentDayConfig} onStart={handleStartDay} />
+            </div>
+          )}
+          
+          {phase === 'WORK' && currentDoc && (
+            <>
+              {activeToolPopup && (
+                <ToolPopup tool={activeToolPopup} onClose={() => setActiveToolPopup(null)} />
+              )}
 
-            <DraggableItem initialPos={{ x: 50, y: 250 }} onDragStart={() => audio.playPaperRustle()}>
-               <div className="bg-[#4a3b32] p-2 rounded shadow-2xl relative w-64 cursor-pointer">
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-stone-300 rounded shadow-md border-t border-white/50 flex items-center justify-center">
-                    <div className="w-12 h-1 bg-black/20 rounded-full"></div>
+              {/* Render Floating Action Text */}
+              {activeSayings.map(s => (
+                 <FloatingText 
+                   key={s.id}
+                   x={s.x} 
+                   y={s.y} 
+                   text={s.text}
+                   type={s.type}
+                   onComplete={() => removeSaying(s.id)} 
+                 />
+              ))}
+
+              <DraggableItem initialPos={{ x: 50, y: 50 }} onDragStart={() => audio.playPaperRustle()}>
+                 <div className="bg-[#1c1917] border border-yellow-600/50 text-stone-300 p-4 w-64 shadow-lg font-tech cursor-pointer backdrop-blur-md bg-opacity-90">
+                    <div className="font-bold text-sm uppercase border-b border-stone-700 pb-1 mb-2 flex justify-between text-yellow-500">
+                      <span>SHIFT_LOG: Day {currentDayConfig.day}</span>
+                      <span>{currentDocIndex + 1}/{currentDocs.length}</span>
+                    </div>
+                    <div className="text-xs leading-tight font-typewriter opacity-80">
+                      // {currentDayConfig.briefing.slice(0, 80)}...
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-700 flex justify-between items-center text-xs font-bold font-mono">
+                      <span>CREDITS: {totalFunds}</span>
+                      {totalFunds < 20 && <span className="text-red-500 animate-pulse">LOW FUNDS!</span>}
+                    </div>
+                    {/* ADDED HINT */}
+                    <div className="mt-3 pt-2 border-t border-stone-800 text-[10px] text-stone-300 text-center uppercase tracking-widest font-sans opacity-80">
+                      (You can drag me around the screen)
+                    </div>
                  </div>
-                 <div className="bg-white p-4 h-full min-h-[300px] text-[11px] font-typewriter leading-snug flex flex-col">
-                   <h3 className="font-bold uppercase underline mb-4 text-center">Protocol: {currentDayConfig.title}</h3>
-                   <ul className="space-y-3 list-disc pl-4 flex-1">
-                      {currentDayConfig.rules.map((r, i) => (
-                        <li key={i} className={`${r.action === 'highlight' ? 'text-blue-800' : r.action === 'recover' ? 'text-green-700' : 'text-red-900'}`}>
-                          {r.description}
-                        </li>
-                      ))}
-                   </ul>
-                   <div className="mt-6 pt-2 border-t border-stone-200 text-[9px] text-stone-400 text-center uppercase tracking-widest font-sans">
-                     (You can drag me around the screen)
+              </DraggableItem>
+
+              <DraggableItem initialPos={{ x: 50, y: 250 }} onDragStart={() => audio.playPaperRustle()}>
+                 <div className="bg-[#1c1917] border border-stone-600 p-0 rounded shadow-2xl relative w-64 cursor-pointer overflow-hidden flex flex-col">
+                   <div className="bg-stone-800 px-2 py-1 flex items-center gap-2 border-b border-stone-600">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-[10px] text-stone-400 font-tech ml-2">PROTOCOL_VIEWER</span>
+                   </div>
+                   <div className="bg-stone-900 p-4 min-h-[250px] text-[11px] font-tech leading-snug flex flex-col text-stone-300">
+                     <h3 className="font-bold uppercase text-stone-200 mb-4 text-center border-b border-stone-700 pb-2">
+                        Op: {currentDayConfig.title}
+                     </h3>
+                     <ul className="space-y-3 list-none pl-0 flex-1">
+                        {currentDayConfig.rules.map((r, i) => (
+                          <li key={i} className={`flex items-start gap-2 ${r.action === 'highlight' ? 'text-blue-400' : r.action === 'recover' ? 'text-green-400' : 'text-red-400'}`}>
+                            <span>></span>
+                            {r.description}
+                          </li>
+                        ))}
+                     </ul>
+                     {/* ADDED HINT */}
+                     <div className="mt-4 pt-2 border-t border-stone-800 text-[10px] text-stone-300 text-center uppercase tracking-widest font-sans opacity-80">
+                       (You can drag me around the screen)
+                     </div>
                    </div>
                  </div>
                  
-                 {/* Step 0: Protocol Tutorial */}
+                 {/* Step 0: Protocol Tutorial - MOVED OUTSIDE OF OVERFLOW-HIDDEN DIV */}
                  {tutorialStep === 0 && (
                     <div className="absolute -right-4 top-10 translate-x-full z-[100]">
                        <TutorialNote 
@@ -888,251 +1022,246 @@ const App: React.FC = () => {
                        />
                     </div>
                  )}
-               </div>
-            </DraggableItem>
+              </DraggableItem>
 
-            {currentDayConfig.specialDirective && !isDirectiveBurned && (
-               <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 350 }} onDragStart={() => audio.playPaperRustle()}>
-                 <BurnableDirective 
-                    directive={currentDayConfig.specialDirective}
-                    onBurnComplete={handleBurnDirective} 
-                 />
-                 
-                 {/* Step 1: Envelope Intro */}
-                 {tutorialStep === 1 && (
-                    <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
-                      <TutorialNote
-                        text="This **Black Envelope** contains a Special Directive. It offers a bribe to break protocol. It is your choice to follow it or not."
-                        arrow="right"
-                        onNext={() => setTutorialStep(2)}
-                      />
-                    </div>
-                 )}
-                 
-                 {/* Step 5: Burn Envelope */}
-                 {tutorialStep === 5 && (
-                    <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
-                      <TutorialNote
-                        text="We cannot leave a paper trail. Click the **Flame Icon** on the envelope to destroy it."
-                        arrow="right"
-                      />
-                    </div>
-                 )}
-               </DraggableItem>
-            )}
+              {currentDayConfig.specialDirective && !isDirectiveBurned && (
+                 <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 350 }} onDragStart={() => audio.playPaperRustle()}>
+                   <BurnableDirective 
+                      directive={currentDayConfig.specialDirective}
+                      onBurnComplete={handleBurnDirective} 
+                   />
+                   
+                   {/* Step 1: Envelope Intro */}
+                   {tutorialStep === 1 && (
+                      <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
+                        <TutorialNote
+                          text="This **Encrypted Directive** offers a bribe to break protocol. It is your choice to follow it or not."
+                          arrow="right"
+                          onNext={() => setTutorialStep(2)}
+                        />
+                      </div>
+                   )}
+                   
+                   {/* Step 5: Burn Envelope */}
+                   {tutorialStep === 5 && (
+                      <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
+                        <TutorialNote
+                          text="We cannot leave a paper trail. Click the **Flame Icon** on the note to delete it."
+                          arrow="right"
+                        />
+                      </div>
+                   )}
+                 </DraggableItem>
+              )}
 
-            {isDraggingDoc && isHoveringOutbox ? (
-               <div 
-                 className="absolute pointer-events-none z-[70] flex flex-col items-center justify-center animate-pulse"
-                 style={{ 
-                    left: docPos.x + docDragRel.x - 48, 
-                    top: docPos.y + docDragRel.y - 48
-                 }} 
-               >
-                 <File className="w-24 h-24 text-stone-200 drop-shadow-2xl" strokeWidth={1} fill="#57534e" />
-                 <span className="bg-black text-white px-2 py-1 text-xs font-bold uppercase rounded mt-2">Release to Submit</span>
-               </div>
-            ) : (
-               <>
-                 <DocumentView 
-                   data={currentDoc} 
-                   rules={currentDayConfig.rules}
-                   redactedIds={redactions[currentDoc.id] || new Set()} 
-                   highlightedIds={highlights[currentDoc.id] || new Set()} 
-                   recoveredIds={recovered[currentDoc.id] || new Set()}
-                   isVoided={voidedDocs[currentDoc.id] || false}
-                   onToggleTokens={handleToggleTokens} 
-                   onRedactAll={handleRedactAll} 
-                   tool={currentTool}
-                   tutorialStep={tutorialStep}
+              {isDraggingDoc && isHoveringOutbox ? (
+                 <div 
+                   className="absolute pointer-events-none z-[70] flex flex-col items-center justify-center animate-pulse"
                    style={{ 
-                     transform: `translate(${docPos.x}px, ${docPos.y}px) scale(${isDraggingDoc ? 1.02 : 1})`,
-                     zIndex: isDraggingDoc ? 50 : 10, 
-                     cursor: currentTool === 'hand' ? (isDraggingDoc ? 'grabbing' : 'grab') : 'default'
-                   }}
-                   onMouseDown={handleDocMouseDown}
-                 />
-                 
-                 {/* Step 3: Redaction Tutorial (Positioned ABOVE document to prevent blocking) */}
-                 {tutorialStep === 3 && (
-                    <div 
-                       className="absolute z-[100] pointer-events-none transition-transform duration-75" 
-                       style={{ 
-                          // Position relative to docPos but offset significantly up and centered
-                          transform: `translate(${docPos.x + 425}px, ${docPos.y - 120}px)`, 
-                       }}
-                    >
-                        <div className="relative -left-1/2 pointer-events-auto">
-                           <TutorialNote 
-                              text="Click on the **highlighted Guest Names** below to redact them."
-                              arrow="down"
-                              style={{ transform: 'rotate(-1deg)' }}
-                           />
-                        </div>
-                    </div>
-                 )}
-               </>
-            )}
+                      left: docPos.x + docDragRel.x - 48, 
+                      top: docPos.y + docDragRel.y - 48
+                   }} 
+                 >
+                   <File className="w-24 h-24 text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.5)]" strokeWidth={1} />
+                   <span className="bg-green-900 text-green-100 px-2 py-1 text-xs font-bold uppercase rounded mt-2 border border-green-500">Confirm Upload</span>
+                 </div>
+              ) : (
+                 <>
+                   <DocumentView 
+                     data={currentDoc} 
+                     rules={currentDayConfig.rules}
+                     redactedIds={redactions[currentDoc.id] || new Set()} 
+                     highlightedIds={highlights[currentDoc.id] || new Set()} 
+                     recoveredIds={recovered[currentDoc.id] || new Set()}
+                     isVoided={voidedDocs[currentDoc.id] || false}
+                     onToggleTokens={handleToggleTokens} 
+                     onRedactAll={handleRedactAll} 
+                     tool={currentTool}
+                     tutorialStep={tutorialStep}
+                     style={{ 
+                       transform: `translate(${docPos.x}px, ${docPos.y}px) scale(${isDraggingDoc ? 1.02 : 1})`,
+                       zIndex: isDraggingDoc ? 50 : 10, 
+                       cursor: currentTool === 'hand' ? (isDraggingDoc ? 'grabbing' : 'grab') : 'default'
+                     }}
+                     onMouseDown={handleDocMouseDown}
+                   />
+                   
+                   {/* Step 3: Redaction Tutorial */}
+                   {tutorialStep === 3 && (
+                      <div 
+                         className="absolute z-[100] pointer-events-none transition-transform duration-75" 
+                         style={{ 
+                            transform: `translate(${docPos.x + 425}px, ${docPos.y - 120}px)`, 
+                         }}
+                      >
+                          <div className="relative -left-1/2 pointer-events-auto">
+                             <TutorialNote 
+                                text="Click on the **highlighted Guest Names** below to redact them."
+                                arrow="down"
+                                style={{ transform: 'rotate(-1deg)' }}
+                             />
+                          </div>
+                      </div>
+                   )}
+                 </>
+              )}
 
-            <div 
-              ref={outboxRef}
-              className={`absolute right-10 bottom-32 w-64 h-48 rounded-lg border-b-[16px] border-r-[16px] transition-all duration-300 flex items-center justify-center z-[55]
-                ${isHoveringOutbox 
-                  ? 'bg-stone-700 border-amber-600 shadow-[0_0_30px_rgba(245,158,11,0.3)] scale-105' 
-                  : 'bg-stone-800 border-stone-900 shadow-2xl'
-                }
-              `}
-            >
-              <div className="absolute -top-6 left-6 bg-stone-300 text-stone-900 px-4 py-2 text-xs font-bold uppercase tracking-widest shadow-sm flex items-center gap-2">
-                <GripHorizontal className="w-3 h-3 opacity-50"/>
-                OUTBOX
-              </div>
-              <div className="text-stone-600 flex flex-col items-center gap-2">
-                 <div className="w-32 h-2 bg-black/20 rounded-full"></div>
-                 <div className="w-24 h-2 bg-black/20 rounded-full"></div>
-              </div>
-            </div>
-
-            {/* Step 6: Outbox Tutorial */}
-            {tutorialStep === 6 && (
-               <div className="absolute right-80 bottom-48 z-[100]">
-                  <TutorialNote
-                     text="Excellent. Now drag the document into the **Outbox** to submit it for filing."
-                     arrow="right"
-                  />
-               </div>
-            )}
-            
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[#2a2522] px-8 pb-4 pt-6 rounded-t-xl shadow-2xl border-t border-white/10 flex gap-4 z-[40]">
-               {availableTools.map(t => (
-                  <button 
-                    key={t} 
-                    onClick={() => handleToolSelect(t as ToolType)} 
-                    className={`
-                      relative group flex flex-col items-center gap-1 transition-all duration-200
-                      ${currentTool === t ? '-translate-y-6 scale-110' : 'hover:-translate-y-2 opacity-70 hover:opacity-100'}
-                    `}
-                  >
-                    <div className={`
-                      w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-2
-                      ${t === 'hand' ? 'bg-stone-500 border-stone-400 text-stone-100' : ''}
-                      ${t === 'marker' ? 'bg-black border-stone-600 text-white' : ''}
-                      ${t === 'highlighter' ? 'bg-yellow-400 border-yellow-200 text-yellow-900' : ''}
-                      ${t === 'recover' ? 'bg-green-700 border-green-500 text-green-100' : ''}
-                      ${t === 'stamp' ? 'bg-red-800 border-red-600 text-red-100' : ''}
-                      ${t === 'void_stamp' ? 'bg-red-950 border-red-800 text-red-500' : ''}
-                      ${t === 'uv' ? 'bg-purple-900 border-purple-500 text-purple-200' : ''}
-                      ${t === 'omni' ? 'bg-stone-100 border-white text-stone-800' : ''}
-                      ${t === 'eraser' ? 'bg-pink-300 border-pink-200 text-pink-800' : ''}
-                      ${t === 'analyzer' ? 'bg-sky-900 border-cyan-500 text-cyan-200' : ''}
-                    `}>
-                      {t === 'hand' && <Hand className="w-6 h-6" />}
-                      {t === 'marker' && <PenLine className="w-6 h-6" />}
-                      {t === 'highlighter' && <Highlighter className="w-6 h-6" />}
-                      {t === 'recover' && <CheckSquare className="w-6 h-6" />}
-                      {t === 'uv' && <Sun className="w-6 h-6" />}
-                      {t === 'stamp' && <Stamp className="w-6 h-6" />}
-                      {t === 'void_stamp' && <Ban className="w-6 h-6" />}
-                      {t === 'omni' && <Key className="w-6 h-6" />}
-                      {t === 'eraser' && <Eraser className="w-6 h-6" />}
-                      {t === 'analyzer' && <Microscope className="w-6 h-6" />}
-                    </div>
-                    <span className="text-[10px] uppercase font-bold text-stone-400 tracking-widest bg-black/80 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {t === 'omni' ? 'Master Key' : t}
-                    </span>
-                  </button>
-               ))}
-            </div>
-
-            {/* Step 2: Toolbox Tutorial - Select Marker */}
-            {tutorialStep === 2 && (
-               <div 
-                 className="absolute bottom-36 left-1/2 z-[100]" 
-                 style={{ transform: 'translateX(32px)' }} 
-               >
-                 <TutorialNote
-                   text="We need to redact names. Select the **Marker Tool**."
-                   arrow="down"
-                   style={{ marginLeft: '-8rem' }}
-                 />
-               </div>
-            )}
-
-            {/* Step 4: Select Hand Tool */}
-            {tutorialStep === 4 && (
-               <div 
-                 className="absolute bottom-36 left-1/2 z-[100]"
-                 style={{ transform: 'translateX(-32px)' }} 
-               >
-                 <TutorialNote
-                   text={step4Text}
-                   arrow="down"
-                   style={{ marginLeft: '-8rem' }} 
-                 />
-               </div>
-            )}
-
-            {citation && (
-              <div className="absolute bottom-32 right-80 z-[100] animate-slide-up">
-                <div className={`
-                   w-64 p-4 shadow-2xl border-l-4 rotate-2 font-typewriter text-xs
-                   ${citation.type === 'PENALTY' ? 'bg-red-100 border-red-600 text-red-900' : 
-                     citation.type === 'BRIBE' ? 'bg-green-100 border-green-600 text-green-900' : 
-                     'bg-yellow-100 border-yellow-500 text-yellow-900'}
-                `}>
-                  <div className="font-bold uppercase border-b border-black/10 pb-1 mb-2 flex justify-between">
-                    <span>{citation.type}</span>
-                    <span>{citation.type === 'PENALTY' ? '-' : '+'}{citation.amount} CR</span>
-                  </div>
-                  <p>{citation.message}</p>
+              {/* Upload Zone (Outbox) */}
+              <div 
+                ref={outboxRef}
+                className={`absolute right-10 bottom-32 w-64 h-32 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center z-[55] rounded
+                  ${isHoveringOutbox 
+                    ? 'bg-green-900/30 border-green-500 scale-105 shadow-[0_0_30px_rgba(74,222,128,0.3)]' 
+                    : 'bg-stone-900/50 border-stone-600 hover:border-stone-400'
+                  }
+                `}
+              >
+                <div className="text-stone-300 flex flex-col items-center gap-2">
+                   {isHoveringOutbox ? <CheckSquare size={32} className="text-green-500"/> : <Scan size={32}/>}
+                   <span className={`font-tech uppercase tracking-widest text-xs ${isHoveringOutbox ? 'text-green-400' : ''}`}>
+                      {isHoveringOutbox ? 'Ready to Upload' : 'Secure Upload Zone'}
+                   </span>
                 </div>
               </div>
-            )}
-          </>
-        )}
 
-        {phase === 'EVALUATION' && (
-           <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
-             <EvaluationView 
-               score={dailyScore} 
-               financials={dailyFinancials}
-               totalFunds={totalFunds}
-               purchasedUpgrades={purchasedUpgrades}
-               auditLogs={dailyAuditLogs} 
-               onNext={handleEvaluationNext} 
-              />
-           </div>
-        )}
-        
-        {phase === 'FEED' && (
-           <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/80">
-             <FeedView feed={currentDayConfig.feed} onNextDay={proceedToShop} />
-           </div>
-        )}
+              {/* Step 6: Outbox Tutorial */}
+              {tutorialStep === 6 && (
+                 <div className="absolute right-80 bottom-40 z-[100]">
+                    <TutorialNote
+                       text="Excellent. Now drag the document into the **Upload Zone** to submit it."
+                       arrow="right"
+                    />
+                 </div>
+              )}
+              
+              {/* Application Dock (Toolbar) */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#0a0c10] px-4 py-2 rounded-lg shadow-2xl border border-stone-800 flex gap-2 z-[60]">
+                 {availableTools.map(t => (
+                    <button 
+                      key={t} 
+                      onClick={() => handleToolSelect(t as ToolType)} 
+                      className={`
+                        relative group flex flex-col items-center justify-center w-12 h-12 rounded transition-all duration-200 border
+                        ${currentTool === t 
+                          ? 'bg-stone-800 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.3)] -translate-y-2' 
+                          : 'bg-stone-900 border-stone-700 hover:bg-stone-800 hover:border-stone-500'
+                        }
+                      `}
+                      title={t.toUpperCase()}
+                    >
+                      <div className={`
+                        ${currentTool === t ? 'text-amber-500' : 'text-stone-400 group-hover:text-stone-200'}
+                      `}>
+                        {t === 'hand' && <Hand size={20} />}
+                        {t === 'marker' && <PenLine size={20} />}
+                        {t === 'highlighter' && <Highlighter size={20} />}
+                        {t === 'recover' && <CheckSquare size={20} />}
+                        {t === 'uv' && <Sun size={20} />}
+                        {t === 'stamp' && <Stamp size={20} />}
+                        {t === 'void_stamp' && <Ban size={20} />}
+                        {t === 'omni' && <Key size={20} />}
+                        {t === 'eraser' && <Eraser size={20} />}
+                        {t === 'analyzer' && <Microscope size={20} />}
+                      </div>
+                      
+                      {/* Tooltip */}
+                      <span className="absolute -top-10 text-[9px] uppercase font-bold text-stone-300 tracking-widest bg-black px-2 py-1 rounded border border-stone-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        {t === 'omni' ? 'MASTER_KEY' : t}
+                      </span>
+                    </button>
+                 ))}
+              </div>
 
-        {phase === 'SHOP' && (
-           <div className="absolute inset-0 flex items-center justify-center z-50 bg-[#1c1917] bg-opacity-95">
-             <ShopView 
-               funds={totalFunds} 
-               expenses={currentExpenses} 
-               purchasedUpgrades={purchasedUpgrades}
-               onBuy={handleBuyUpgrade}
-               onNext={finishShop} 
-             />
-           </div>
-        )}
+              {/* Step 2: Toolbox Tutorial */}
+              {tutorialStep === 2 && (
+                 <div 
+                   className="absolute bottom-28 left-1/2 z-[100]" 
+                   style={{ transform: 'translateX(32px)' }} 
+                 >
+                   <TutorialNote
+                     text="Select the **Marker Tool** from the dock."
+                     arrow="down"
+                     style={{ marginLeft: '-8rem' }}
+                   />
+                 </div>
+              )}
 
-        {phase === 'GAME_OVER' && (
-          <div className="absolute inset-0 flex items-center justify-center z-50 bg-black">
-            <GameOverView funds={totalFunds} onBackToMenu={handleBackToMenu} />
-          </div>
-        )}
-        
-        {phase === 'VICTORY' && (
-           <div className="absolute inset-0 flex items-center justify-center z-50">
-             <VictoryView funds={totalFunds} moralScore={moralScore} onBackToMenu={handleBackToMenu} />
-           </div>
-        )}
+              {/* Step 4: Select Hand Tool */}
+              {tutorialStep === 4 && (
+                 <div 
+                   className="absolute bottom-28 left-1/2 z-[100]"
+                   style={{ transform: 'translateX(-32px)' }} 
+                 >
+                   <TutorialNote
+                     text={step4Text}
+                     arrow="down"
+                     style={{ marginLeft: '-8rem' }} 
+                   />
+                 </div>
+              )}
+
+              {citation && (
+                <div className="absolute bottom-32 right-80 z-[100] animate-slide-up">
+                  <div className={`
+                     w-64 p-4 shadow-2xl border-l-4 font-tech text-xs bg-black/90 border border-stone-700
+                     ${citation.type === 'PENALTY' ? 'border-l-red-600 text-red-400' : 
+                       citation.type === 'BRIBE' ? 'border-l-green-600 text-green-400' : 
+                       'border-l-yellow-500 text-yellow-400'}
+                  `}>
+                    <div className="font-bold uppercase border-b border-stone-800 pb-1 mb-2 flex justify-between">
+                      <span>{citation.type}</span>
+                      <span>{citation.type === 'PENALTY' ? '-' : '+'}{citation.amount} CR</span>
+                    </div>
+                    <p>{citation.message}</p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {phase === 'EVALUATION' && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+               <EvaluationView 
+                 score={dailyScore} 
+                 financials={dailyFinancials}
+                 totalFunds={totalFunds}
+                 purchasedUpgrades={purchasedUpgrades}
+                 auditLogs={dailyAuditLogs} 
+                 onNext={handleEvaluationNext} 
+                />
+             </div>
+          )}
+          
+          {phase === 'FEED' && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/80">
+               <FeedView feed={currentDayConfig.feed} onNextDay={proceedToShop} />
+             </div>
+          )}
+
+          {phase === 'SHOP' && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-[#1c1917] bg-opacity-95">
+               <ShopView 
+                 funds={totalFunds} 
+                 expenses={currentExpenses} 
+                 purchasedUpgrades={purchasedUpgrades}
+                 onBuy={handleBuyUpgrade}
+                 onNext={finishShop} 
+               />
+             </div>
+          )}
+
+          {phase === 'GAME_OVER' && (
+            <div className="absolute inset-0 flex items-center justify-center z-50 bg-black">
+              <GameOverView funds={totalFunds} onBackToMenu={handleBackToMenu} />
+            </div>
+          )}
+          
+          {phase === 'VICTORY' && (
+             <div className="absolute inset-0 flex items-center justify-center z-50">
+               <VictoryView funds={totalFunds} moralScore={moralScore} onBackToMenu={handleBackToMenu} />
+             </div>
+          )}
+        </div>
       </div>
     </div>
   );

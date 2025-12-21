@@ -12,12 +12,12 @@ export const day5: DayConfig = {
   ],
   specialDirective: {
     id: "sd_5",
-    description: "CLEAN SWEEP",
+    description: "ESTABLISH JURISDICTION",
     targetText: ["St. Thomas"], 
-    requiredAction: 'REDACT', 
+    requiredAction: 'REVEAL', 
     bribeReward: 100,
     disobediencePenalty: 50,
-    flavorText: "DIRECTIVE 33: We have no assets in St. Thomas. Correct the record."
+    flavorText: "DIRECTIVE 33: We need to claim jurisdiction in St. Thomas to block the feds. Ensure the location is on record."
   },
   unlockedTools: ['marker', 'stamp'],
   documents: [

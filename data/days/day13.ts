@@ -13,19 +13,19 @@ export const day13: DayConfig = {
   ],
   specialDirective: {
     id: "sd_13",
-    description: "LET IT SPEAK",
+    description: "SUPPRESS PROPHECY",
     targetText: ["will rain tomorrow"], 
-    requiredAction: 'REVEAL', 
+    requiredAction: 'REDACT', 
     bribeReward: 150,
     disobediencePenalty: 50,
-    flavorText: "DIRECTIVE 42: The AI is predicting. Let the prediction stand."
+    flavorText: "DIRECTIVE 42: The prediction is too accurate. It scares the board. Redact it, do not recover."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter', 'recover'],
   documents: [
     {
       id: "d13_1",
       title: "Sys Log 99",
-      content: HEADER + "Error: {BRI-ERR-404|bri_error}: Buffer Underrun.\n\n{The cat is on the mat.|text} (Flagged as threat)." + FOOTER
+      content: HEADER + "Error: {BRI-ERR-404|bri_error}: Buffer Underrun.\n\n{It will rain tomorrow.|text} (Flagged as threat)." + FOOTER
     },
     {
       id: "d13_2",

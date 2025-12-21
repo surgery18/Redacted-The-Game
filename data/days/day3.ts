@@ -9,12 +9,12 @@ export const day3: DayConfig = {
   rules: [{ description: "STAMP PAGE if Financial ID/SSN present", targetTypes: ['financial_id', 'social_id', 'total_blackout'] }],
   specialDirective: {
     id: "sd_3",
-    description: "SHADOW FUNDING",
+    description: "HONEYPOT TRAP",
     targetText: ["99-221-11"], 
-    requiredAction: 'REDACT', 
+    requiredAction: 'REVEAL', 
     bribeReward: 120,
     disobediencePenalty: 50,
-    flavorText: "DIRECTIVE 212: This shell company funds our black ops. If the press finds this Tax ID, we are finished. Bury it."
+    flavorText: "DIRECTIVE 212: This account is a trap for the leakers. We need them to see it. Leave it exposed. Do NOT stamp."
   },
   unlockedTools: ['marker', 'stamp'],
   documents: [

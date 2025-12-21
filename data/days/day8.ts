@@ -13,19 +13,19 @@ export const day8: DayConfig = {
   ],
   specialDirective: {
     id: "sd_8",
-    description: "BURY THE ERROR",
-    targetText: ["Explosion"], 
+    description: "WIPE THE RECORD",
+    targetText: ["RPT-992"], 
     requiredAction: 'REDACT', 
     bribeReward: 130,
     disobediencePenalty: 50,
-    flavorText: "DIRECTIVE 13: This failure mode is embarrassing. Ensure it is redacted."
+    flavorText: "DIRECTIVE 13: This specific report number is compromised. Redact it. Do NOT highlight it."
   },
   unlockedTools: ['marker', 'stamp', 'highlighter'],
   documents: [
     {
       id: "d8_1",
       title: "Morgue Log",
-      content: HEADER + "Ref: {RPT-992|report_id}\n\nSubject expired at 0400 hours.\nCause: {Total Organ Liquefaction|adverse_outcome}." + FOOTER
+      content: HEADER + "Ref: {RPT-992|report_id}\n\nSubject expired at 0400 hours.\nCause: {Spontaneous Explosion|adverse_outcome}." + FOOTER
     },
     {
       id: "d8_2",

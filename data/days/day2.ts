@@ -10,18 +10,18 @@ export const day2: DayConfig = {
   specialDirective: {
     id: "sd_2",
     description: "PROTECT THE VIP",
-    targetText: ["G.M."], 
+    targetText: ["Ghislaine"], 
     requiredAction: 'REDACT', 
     bribeReward: 100,
     disobediencePenalty: 40,
-    flavorText: "DIRECTIVE 101: Ghislaine is a valuable asset. Her initials must not appear in the record."
+    flavorText: "DIRECTIVE 101: Ghislaine is a valuable asset. Her name must not appear in the record."
   },
   unlockedTools: ['marker'],
   documents: [
     {
       id: "d2_1",
       title: "Staff Interview",
-      content: HEADER + "WITNESS: Maria R. (Housekeeper)\n\nI saw the girls arriving on the boat. One was named {Virginia G.|victim}. She looked terrified. She told me she was only {17|minor_age} at the time.\n\nShe was crying in the hallway near the master suite. I tried to offer her water, but Mr. Epstein told me to leave the premises immediately. Later that night, I saw {Virginia G.|victim} running towards the beach." + FOOTER
+      content: HEADER + "WITNESS: Maria R. (Housekeeper)\n\nI saw the girls arriving on the boat. One was named {Virginia G.|victim}. She looked terrified. She told me she was only {17|minor_age} at the time.\n\nShe was crying in the hallway near the master suite. I tried to offer her water, but {Ghislaine|name} intervened and told me to leave the premises immediately. Later that night, I saw {Virginia G.|victim} running towards the beach." + FOOTER
     },
     {
       id: "d2_2",
