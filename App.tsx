@@ -201,41 +201,44 @@ const BurnableDirective: React.FC<{
   };
 
   return (
-    <div className={`relative w-64 ${isBurning ? 'burning' : ''} transition-all`}>
-      {/* Burning Edge Effect Overlay */}
-      <div className={`burn-edge ${isBurning ? 'opacity-100' : 'opacity-0'}`}></div>
-
-      {/* Smoke Particles */}
-      {isBurning && (
-        <div className="absolute inset-0 pointer-events-none overflow-visible z-50">
-          {[...Array(15)].map((_, i) => (
+    <div className={`relative w-64 ${isBurning ? 'burning' : ''} transition-all select-none`}>
+      
+      {/* Moving Fire Front & Particles */}
+      <div className={`fire-container ${isBurning ? 'opacity-100' : 'opacity-0'}`}>
+         <div className="fire-flames"></div>
+         {isBurning && (
+          <div className="absolute inset-0 overflow-visible">
+            {/* Smoke Particles generated relative to the fire front */}
+            {[...Array(15)].map((_, i) => (
              <div 
-               key={i} 
+               key={`smoke-${i}`} 
                className="smoke" 
                style={{ 
                  left: `${10 + Math.random() * 80}%`, 
-                 animationDelay: `${Math.random() * 0.5}s`,
-                 bottom: '10px'
+                 animationDelay: `${Math.random() * 0.3}s`,
+                 bottom: '20px'
                }} 
              />
-          ))}
-          {[...Array(8)].map((_, i) => (
+            ))}
+            {/* Spark Particles */}
+            {[...Array(10)].map((_, i) => (
              <div 
                key={`spark-${i}`} 
                className="spark" 
                style={{ 
                  left: `${20 + Math.random() * 60}%`, 
-                 bottom: '0px',
-                 animationDelay: `${Math.random() * 1}s`,
+                 bottom: '10px',
+                 animationDelay: `${Math.random() * 0.5}s`,
                  // @ts-ignore custom prop
-                 '--dx': `${(Math.random() - 0.5) * 50}px`
+                 '--dx': `${(Math.random() - 0.5) * 60}px`
                }} 
              />
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+         )}
+      </div>
 
-      {/* Content Styled as an Encrypted Note */}
+      {/* Content Styled as an Encrypted Note - Masked by Burn */}
       <div className={`bg-stone-900 border border-green-900/50 p-4 shadow-2xl rotate-[3deg] group cursor-pointer transition-transform hover:scale-105 ${isBurning ? 'burning-mask' : ''}`}>
         <div className="text-green-500 text-[10px] uppercase font-tech tracking-[0.3em] mb-2 text-center border-b border-green-900 pb-2">
            // ENCRYPTED DIRECTIVE
