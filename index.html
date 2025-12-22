@@ -82,10 +82,6 @@
       .font-stamp { font-family: 'Special Elite', cursive; }
       .font-tech { font-family: 'Share Tech Mono', monospace; }
 
-      .redaction-marker {
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="black" stroke="white" stroke-width="1"><circle cx="12" cy="12" r="10"/></svg>') 12 12, auto;
-      }
-
       /* Animations */
       @keyframes slide-up {
         from { transform: translateY(100%); opacity: 0; }
@@ -98,84 +94,42 @@
       @keyframes stamp-slam {
         0% { transform: scale(3) rotate(-10deg); opacity: 0; }
         70% { transform: scale(0.9) rotate(2deg); opacity: 1; }
-        100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
       }
       .stamp-effect {
-        animation: stamp-slam 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        animation: stamp-slam 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       }
       
-      .shake {
-        animation: shake 0.3s;
-        animation-iteration-count: 1;
+      /* New Main Menu Animations */
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
-      @keyframes shake {
-        0% { transform: translate(1px, 1px) rotate(0deg); }
-        10% { transform: translate(-1px, -2px) rotate(-1deg); }
-        20% { transform: translate(-3px, 0px) rotate(1deg); }
-        30% { transform: translate(3px, 2px) rotate(0deg); }
-        40% { transform: translate(1px, -1px) rotate(1deg); }
-        50% { transform: translate(-1px, 2px) rotate(-1deg); }
-        60% { transform: translate(-3px, 1px) rotate(0deg); }
-        70% { transform: translate(3px, 1px) rotate(-1deg); }
-        80% { transform: translate(-1px, -1px) rotate(1deg); }
-        90% { transform: translate(1px, 2px) rotate(0deg); }
-        100% { transform: translate(1px, -2px) rotate(-1deg); }
+      .animate-fade-in {
+        animation: fade-in 0.5s ease-out forwards;
       }
 
-      .uv-reveal {
-        color: #7e22ce;
-        text-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
-        font-weight: bold;
+      /* Slow Wipe Redaction Animation */
+      @keyframes redaction-wipe {
+        0% { clip-path: inset(0 100% 0 0); opacity: 1; }
+        100% { clip-path: inset(0 0 0 0); opacity: 1; }
+      }
+      .redaction-bar-anim {
+        animation: redaction-wipe 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
 
-      /* Burning Animation */
-      @keyframes burn-paper {
-        0% { clip-path: inset(0 0 0 0); filter: brightness(1); }
-        20% { clip-path: inset(0 0 0 0); filter: sepia(1) brightness(0.8) contrast(1.2); }
-        100% { clip-path: inset(0 0 100% 0); filter: sepia(1) brightness(0.5); }
+      .noise-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYUN+y7KAAAAGXRSTlNCGNm2Hn4D9J0N95/t2K1e/X6L/P3Lg58AAABhSURBVDjL7ZbbDoAgCEPdP6H//+mKixxN6jT7N6tU811E7e3Vvj48Gj04zV6lB/XmR7vj00wM/1O7B/qR08c/3O+h/2s2F/2s2F/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/w1/33xQ0pLAAAAAElFTkSuQmCC'); 
+        opacity: 0.05;
+        pointer-events: none;
+        mix-blend-mode: overlay;
       }
-      .burning-mask { animation: burn-paper 2s forwards ease-in; }
 
-      .burn-edge {
-        position: absolute; left: -10%; right: -10%; height: 40px;
-        background: linear-gradient(to top, transparent, rgba(255, 69, 0, 0.9), #ffcc00, transparent);
-        mix-blend-mode: screen; filter: blur(2px) contrast(1.5);
-        opacity: 0; pointer-events: none; z-index: 10; border-radius: 50%;
-      }
-      .burning .burn-edge { animation: burn-edge-move 2s forwards ease-in; }
-      
-      @keyframes burn-edge-move {
-        0% { top: 100%; opacity: 0; transform: scaleX(1); }
-        10% { opacity: 1; }
-        20% { opacity: 1; }
-        100% { top: -20%; opacity: 0; transform: scaleX(1.2); }
-      }
-      
-      /* Smoke */
-      .smoke {
-        position: absolute; width: 15px; height: 15px; background: rgba(80, 80, 80, 0.6);
-        border-radius: 50%; filter: blur(4px); animation: smoke-rise 1.5s infinite; opacity: 0;
-      }
-      @keyframes smoke-rise {
-        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.8; }
-        100% { transform: translateY(-120px) scale(3) rotate(180deg); opacity: 0; }
-      }
-      /* Sparks */
-      .spark {
-        position: absolute; width: 2px; height: 2px; background: #ffcc00; box-shadow: 0 0 4px #ff4500;
-        border-radius: 50%; animation: spark-fly 1s infinite linear; opacity: 0;
-      }
-      @keyframes spark-fly {
-        0% { transform: translate(0, 0); opacity: 1; }
-        100% { transform: translate(var(--dx), -80px); opacity: 0; }
-      }
-      
-      /* Tech Paper Texture for Document View (Scanned look) */
-      .scanned-texture {
-        background-color: #f0f2f5;
-        background-image: 
-          url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-        box-shadow: inset 0 0 60px rgba(0,0,0,0.1);
+      .document-ruled-paper {
+        background-image: linear-gradient(#f4f1ea 19px, #d4d0c8 20px);
+        background-size: 100% 20px;
       }
     </style>
   <script type="importmap">
