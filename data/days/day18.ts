@@ -24,7 +24,7 @@ export const day18: DayConfig = {
     {
       id: "d18_1",
       title: "Termination List",
-      content: HEADER + "1. {Agent Smith|staff}\n2. {Agent Jones|staff} ({Contaminated|contamination})\n3. {Agent Brown|staff}" + FOOTER
+      content: HEADER + "1. {Agent Smith|staff||REPLACED}\n2. {Agent Jones|staff} ({Contaminated|contamination})\n3. {Agent Brown|staff}" + FOOTER
     },
     {
       id: "d18_2",

@@ -11,8 +11,10 @@ interface DocumentViewProps {
   highlightedIds: Set<string>;
   recoveredIds: Set<string>;
   isVoided: boolean;
+  collectedSecrets: string[];
   onToggleTokens: (ids: string[], e: React.MouseEvent) => void;
   onRedactAll: (e: React.MouseEvent) => void;
+  onCollectSecret?: (text: string, e: React.MouseEvent) => void;
   tool: ToolType;
   tutorialStep?: number;
   isEval?: boolean;
@@ -27,8 +29,10 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
   highlightedIds,
   recoveredIds,
   isVoided,
+  collectedSecrets,
   onToggleTokens,
   onRedactAll,
+  onCollectSecret,
   tool,
   tutorialStep,
   isEval = false,
@@ -134,6 +138,10 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
               const isTutorialTarget = (tutorialStep === 2 || tutorialStep === 3) && token.type === 'name';
 
               const isPartOfHoveredGroup = hoveredToken?.groupId && token.groupId === hoveredToken.groupId;
+              
+              // Secret Status
+              const hasSecret = !!token.uvText;
+              const isSecretFound = hasSecret && collectedSecrets.includes(token.uvText!);
 
               return (
                 <span
@@ -141,6 +149,13 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                   onMouseEnter={() => setHoveredTokenId(token.id)}
                   onMouseLeave={() => setHoveredTokenId(null)}
                   onClick={(e) => {
+                    // UV Secret Collection Logic
+                    if (tool === 'uv' && hasSecret && onCollectSecret) {
+                      e.stopPropagation();
+                      onCollectSecret(token.uvText!, e);
+                      return;
+                    }
+
                     if (tool === 'hand' || tool === 'omni') return;
                     if (!isEval && !isWhitespace && !['stamp', 'uv', 'void_stamp', 'analyzer'].includes(tool)) {
                       e.stopPropagation();
@@ -169,14 +184,17 @@ export const DocumentView: React.FC<DocumentViewProps> = ({
                     ${isTutorialTarget && !isRedacted
                       ? 'ring-4 ring-yellow-400 ring-offset-2 animate-pulse bg-yellow-100/50 z-50 rounded-sm'
                       : ''}
+                    ${tool === 'uv' && hasSecret ? 'cursor-help' : ''}
+                    ${tool === 'uv' && hasSecret && !isRedacted && !isSecretFound ? 'bg-purple-100/30 shadow-[0_0_8px_rgba(168,85,247,0.3)]' : ''}
                   `}
                 >
                   {token.text}
                   
-                  {/* UV Tool Effect */}
-                  {!isRedacted && isUVActive && token.uvText && (
-                    <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-purple-900 text-purple-100 text-[10px] px-3 py-1 rounded shadow-xl whitespace-nowrap uv-reveal border border-purple-500 z-50">
-                      HIDDEN: {token.uvText}
+                  {/* UV Tool Effect - Revealing the Secret */}
+                  {!isRedacted && isUVActive && hasSecret && !isSecretFound && (
+                    <span className="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-purple-900 text-purple-100 text-[10px] px-3 py-1 rounded shadow-xl whitespace-nowrap uv-reveal border border-purple-500 z-50 flex flex-col items-center">
+                      <span>HIDDEN: {token.uvText}</span>
+                      <span className="text-[8px] text-purple-300 mt-1 uppercase tracking-wider">(Click to Record)</span>
                     </span>
                   )}
 

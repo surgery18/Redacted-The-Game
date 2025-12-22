@@ -24,7 +24,7 @@ export const day9: DayConfig = {
     {
       id: "d9_1",
       title: "Surgery Schedule",
-      content: HEADER + "Lead Surgeon: {Dr. A. Lecter|staff}\nAssistant: {Nurse Ratched|staff}\n\nProcedure: Lobotomy (Trans-orbital)." + FOOTER
+      content: HEADER + "Lead Surgeon: {Dr. A. Lecter|staff}\nAssistant: {Nurse Ratched|staff||WITNESS}\n\nProcedure: Lobotomy (Trans-orbital)." + FOOTER
     },
     {
       id: "d9_2",

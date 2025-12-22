@@ -130,6 +130,8 @@ export interface GameSave {
   maxDayReached: number;
   seenTools?: ToolType[]; // Track which tool tutorials have been shown
   tutorialCompleted?: boolean; // Track if Day 1 tutorial is done
+  collectedSecrets?: string[]; // Persistent list of UV secrets found
+  windowPositions?: Record<string, {x: number, y: number}>; // Persistent UI layout
 }
 
 export interface GameState {

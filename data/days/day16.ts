@@ -21,7 +21,7 @@ export const day16: DayConfig = {
     {
       id: "d16_1",
       title: "Field Report",
-      content: HEADER + "Agent K reports seeing a pattern.\n\nHe called it {EIDOLON|eidolon}." + FOOTER
+      content: HEADER + "Agent K reports seeing a pattern.\n\nHe called it {EIDOLON|eidolon||IT IS HERE}." + FOOTER
     },
     {
       id: "d16_2",

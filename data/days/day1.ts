@@ -21,17 +21,17 @@ export const day1: DayConfig = {
     {
       id: "d1_1",
       title: "Flight Log 772",
-      content: HEADER + "AIRCRAFT: Boeing 727 (Tail N908JE)\nDATE: 04/12/1999\nROUTING: Teterboro -> Little St. James\n\nPASSENGER MANIFEST:\n1. {J. E.|name} (Principal)\n2. {Ghislaine M.|name} (Associate)\n3. {Donald Trump|name} (Guest - Seat 1A)\n4. {Prince Andrew|name} (Guest - Seat 1B)\n5. {Bill C.|name} (Guest - Seat 2A)\n\nCREW:\nPilot: D. Rodgers\nStewardess: S. Kellen\n\nNOTES: Flight experienced minor turbulence over the Atlantic." + FOOTER
+      content: HEADER + "AIRCRAFT: Boeing 727 (Tail N908JE)\nDATE: 04/12/1999\nROUTING: Teterboro -> Little St. James\n\nPASSENGER MANIFEST:\n1. {J. E.|name||Owner - Do Not Track|Secret: He works for us}\n2. {Ghislaine M.|name||Handler}\n3. {Donald Trump|name|Guest - Seat 1A|Future Asset?}\n4. {Prince Andrew|name|Guest - Seat 1B|Royal Immunity|Secret: Code 99}\n5. {Bill C.|name|Guest - Seat 2A|Compromised}\n\nCREW:\nPilot: D. Rodgers\nStewardess: S. Kellen\n\nNOTES: Flight experienced minor turbulence over the Atlantic." + FOOTER
     },
     {
       id: "d1_2",
       title: "Pilot Note",
-      content: HEADER + "Subject: Special Requests\n\nGuests {D. Trump|name} and {Bill Clinton|name} require separate private transport to the main villa upon arrival. There seems to be some tension regarding the sleeping arrangements.\n\nPilot requests additional fuel for the return trip to New Mexico immediately following drop-off." + FOOTER
+      content: HEADER + "Subject: Special Requests\n\nGuests {D. Trump|name} and {Bill Clinton|name} require separate private transport to the main villa upon arrival. There seems to be some tension regarding the sleeping arrangements.\n\nPilot requests additional fuel for the return trip to New Mexico immediately following drop-off.{|uv||Hidden compartment in cargo hold checked. Empty.|Secret: Cargo is missing}" + FOOTER
     },
     {
       id: "d1_3",
       title: "Standard Cargo Manifest",
-      content: HEADER + "Shipment ID: CM-909\nCarrier: Atlantic Freight\n\nItems:\n- 10x Cases of French Wine\n- 5x Crates of Tropical Fruit\n- 1x Yamaha Baby Grand Piano\n\nNo sensitive individuals aboard this vessel. Clearance granted." + FOOTER
+      content: HEADER + "Shipment ID: CM-909\nCarrier: Atlantic Freight\n\nItems:\n- 10x Cases of French Wine\n- 5x Crates of Tropical Fruit\n- 1x Yamaha Baby Grand Piano\n\nNo sensitive individuals aboard this vessel. Clearance granted.{|uv||Crate 4 contains unmarked bills.|Secret: Laundered Cash}" + FOOTER
     }
   ],
   feed: { headline: "FINANCIER FOUND DEAD", body: "Authorities rule it a suicide. No cameras were active." }

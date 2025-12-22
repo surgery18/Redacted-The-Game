@@ -24,7 +24,7 @@ export const day11: DayConfig = {
     {
       id: "d11_1",
       title: "Drone Footage Log",
-      content: HEADER + "Target tracking active at {Central Park|location}.\nTime: {09:00:22 EST|timestamp}." + FOOTER
+      content: HEADER + "Target tracking active at {Central Park|location}.\nTime: {09:00:22 EST|timestamp||TOO LATE}." + FOOTER
     },
     {
       id: "d11_2",

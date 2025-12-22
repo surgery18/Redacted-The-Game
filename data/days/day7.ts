@@ -25,7 +25,7 @@ export const day7: DayConfig = {
     {
       id: "d7_1",
       title: "Grant Approval",
-      content: HEADER + "Recipient: {The Marrow Institute|clinic_name}\nAmount: $50M\nSource Acct: {CH-9922-11|financial_id}" + FOOTER
+      content: HEADER + "Recipient: {The Marrow Institute|clinic_name}\nAmount: $50M\nSource Acct: {CH-9922-11|financial_id||LAUNDERED}" + FOOTER
     },
     {
       id: "d7_2",

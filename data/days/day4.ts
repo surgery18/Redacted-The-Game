@@ -25,7 +25,7 @@ export const day4: DayConfig = {
     {
       id: "d4_1",
       title: "Contact Entry: A.B.",
-      content: HEADER + "Name: {Alec Baldwin|name}\nPhone: {212-555-0199|phone}\nAddress: {44 West 87th St, NY|address}" + FOOTER
+      content: HEADER + "Name: {Alec Baldwin|name||ASSET}\nPhone: {212-555-0199|phone}\nAddress: {44 West 87th St, NY|address}" + FOOTER
     },
     {
       id: "d4_2",

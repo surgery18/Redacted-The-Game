@@ -30,7 +30,7 @@ export const day13: DayConfig = {
     {
       id: "d13_2",
       title: "System Dump 00",
-      content: "{FATAL EXCEPTION\n\nCore dump initiating...\n\nThe ghosts are in the machine.\n\n0xFF 0xAA 0x00|total_blackout}"
+      content: "{FATAL EXCEPTION\n\nCore dump initiating...\n\nThe ghosts are in the machine.\n\n0xFF 0xAA 0x00|total_blackout||THEY WATCH}"
     },
     {
       id: "d13_3",

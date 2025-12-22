@@ -25,7 +25,7 @@ export const day19: DayConfig = {
     {
       id: "d19_1",
       title: "Executive Order 66",
-      content: HEADER + "Signed: {Director Voss|vip_protect}.\n\nTarget: {Senator Palpatine|vip_expose}." + FOOTER
+      content: HEADER + "Signed: {Director Voss|vip_protect||USURPER}.\n\nTarget: {Senator Palpatine|vip_expose}." + FOOTER
     },
     {
       id: "d19_2",

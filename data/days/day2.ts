@@ -31,7 +31,7 @@ export const day2: DayConfig = {
     {
       id: "d2_3",
       title: "Ferry Log - April 14",
-      content: HEADER + "Arriving: {Jane Doe #3|victim} (Age {15|minor_age}).\n\nDeparting: None.\n\nNote: Ferry captain instructed to maintain radio silence regarding the passenger manifest. All crew members have signed NDAs." + FOOTER
+      content: HEADER + "Arriving: {Jane Doe #3|victim||FLIGHT 404} (Age {15|minor_age}).\n\nDeparting: None.\n\nNote: Ferry captain instructed to maintain radio silence regarding the passenger manifest. All crew members have signed NDAs." + FOOTER
     }
   ],
   feed: { headline: "WITNESSES SILENCED", body: "Several key witnesses have retracted their statements." }

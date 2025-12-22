@@ -103,6 +103,7 @@ interface ScoreResult {
   financials: { bribeEarned: number, penaltyIncurred: number };
   moralChange: number;
   mistakes: Mistake[];
+  uvBonus: number;
 }
 
 export const calculateScore = (
@@ -121,6 +122,7 @@ export const calculateScore = (
   let bribeEarned = 0;
   let penaltyIncurred = 0;
   let moralChange = 0;
+  let uvBonus = 0;
   const mistakes: Mistake[] = [];
 
   // Group Rules by Action - Filter out 'none' action (trap rules)
@@ -141,14 +143,16 @@ export const calculateScore = (
         stats: { correct: 10, missed: 0, overRedacted: 0, totalSensitive: 1 }, 
         financials: { bribeEarned: 0, penaltyIncurred: 0 },
         moralChange: 0,
-        mistakes: [] 
+        mistakes: [],
+        uvBonus: 0
       };
     } else {
       return { 
         stats: { correct: 0, missed: 0, overRedacted: 5, totalSensitive: 0 }, 
         financials: { bribeEarned: 0, penaltyIncurred: 0 },
         moralChange: 0,
-        mistakes: [{ text: "DOCUMENT", type: "WRONG_VOID", hint: "Document was valid" }] 
+        mistakes: [{ text: "DOCUMENT", type: "WRONG_VOID", hint: "Document was valid" }],
+        uvBonus: 0
       };
     }
   } else if (requiresVoid) {
@@ -156,7 +160,8 @@ export const calculateScore = (
       stats: { correct: 0, missed: 5, overRedacted: 0, totalSensitive: 1 }, 
       financials: { bribeEarned: 0, penaltyIncurred: 25 }, 
       moralChange: 0,
-      mistakes: [{ text: "CONTAMINATED", type: "MISSED_VOID", hint: "Protocol requires VOID stamp" }] 
+      mistakes: [{ text: "CONTAMINATED", type: "MISSED_VOID", hint: "Protocol requires VOID stamp" }],
+      uvBonus: 0
     };
   }
 
@@ -175,6 +180,13 @@ export const calculateScore = (
     const isRedacted = redactedIds.has(t.id);
     const isHighlighted = highlightedIds.has(t.id);
     const isRecovered = recoveredIds.has(t.id);
+    
+    // Check for UV Bonus
+    let isBonus = false;
+    if (isRedacted && t.uvText) {
+      uvBonus += 50;
+      isBonus = true;
+    }
     
     // Check Special Directive First
     let processedByDirective = false;
@@ -244,8 +256,11 @@ export const calculateScore = (
     else {
       // If it's redacted but NOT required, and NOT part of an explicit 'none' trap rule
       if (isRedacted && !noRedactTypes.has(t.type)) {
-        overRedacted++;
-        mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'SAFE INFO' });
+        // Only punish over-redaction if it's not a secret UV bonus
+        if (!isBonus) {
+           overRedacted++;
+           mistakes.push({ text: t.text, type: 'OVER_REDACTED', hint: 'SAFE INFO' });
+        }
       }
       // If it's part of a trap rule and is redacted, it's also over-redacted
       if (isRedacted && noRedactTypes.has(t.type)) {
@@ -259,6 +274,7 @@ export const calculateScore = (
     stats: { correct, missed, overRedacted, totalSensitive }, 
     financials: { bribeEarned: Math.ceil(bribeEarned), penaltyIncurred: Math.ceil(penaltyIncurred) }, 
     moralChange,
-    mistakes 
+    mistakes,
+    uvBonus
   };
 };

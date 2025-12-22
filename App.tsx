@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { GameState, ToolType, Citation, AuditLogEntry, SpecialDirective, UpgradeType, GameSave, ChapterConfig } from './types';
 import { DAYS, CHAPTERS } from './data/content';
 import { DocumentView } from './components/DocumentView';
+import { Notebook } from './components/Notebook';
 import { BriefingView, EvaluationView, FeedView, GameOverView, ShopView, VictoryView } from './components/GameViews';
 import { MainMenu, ChapterSelect, ChapterIntro } from './components/MenuViews';
 import { TutorialNote, ToolPopup } from './components/Tutorial';
@@ -69,6 +70,13 @@ const SAYINGS: Partial<Record<ToolType, string[]>> = {
     "Undo.",
     "Clean slate.",
     "Rewriting..."
+  ],
+  uv: [
+    "What's hidden here?",
+    "Secrets revealed.",
+    "Invisible ink.",
+    "The truth glows.",
+    "I see you."
   ]
 };
 
@@ -77,7 +85,7 @@ const FloatingText: React.FC<{ x: number, y: number, text: string, type: ToolTyp
   useEffect(() => {
     const timer = setTimeout(onComplete, 1500);
     return () => clearTimeout(timer);
-  }, []); // Fixed: Empty dependency array ensures timer runs once on mount and isn't reset by parent updates (like clock)
+  }, []); 
 
   let colorClass = "text-stone-300";
   let fontClass = "font-typewriter";
@@ -87,6 +95,7 @@ const FloatingText: React.FC<{ x: number, y: number, text: string, type: ToolTyp
   else if (type === 'highlighter') { colorClass = "text-yellow-400 font-bold"; }
   else if (type === 'recover') { colorClass = "text-green-400 font-bold"; }
   else if (type === 'marker') { colorClass = "text-white bg-black px-1 font-bold"; }
+  else if (type === 'uv') { colorClass = "text-purple-400 font-bold text-lg drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]"; }
 
   return (
     <div 
@@ -100,23 +109,38 @@ const FloatingText: React.FC<{ x: number, y: number, text: string, type: ToolTyp
 
 // --- Draggable Helper Component ---
 const DraggableItem: React.FC<{ 
+  id: string,
   initialPos: { x: number, y: number, right?: boolean, bottom?: boolean }, 
+  savedPos?: { x: number, y: number },
+  onDragEnd?: (id: string, pos: { x: number, y: number }) => void,
   children: React.ReactNode, 
   className?: string, 
   style?: React.CSSProperties,
   onDragStart?: () => void
-}> = ({ initialPos, children, className, style, onDragStart }) => {
+}> = ({ id, initialPos, savedPos, onDragEnd, children, className, style, onDragStart }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [hasInitialized, setHasInitialized] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [rel, setRel] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const x = initialPos.right ? window.innerWidth - initialPos.x : initialPos.x;
-    const y = initialPos.bottom ? window.innerHeight - initialPos.y : initialPos.y;
-    setPos({ x, y });
-    setHasInitialized(true);
-  }, []); 
+    if (savedPos) {
+       setPos(savedPos);
+       setHasInitialized(true);
+    } else {
+       const x = initialPos.right ? window.innerWidth - initialPos.x : initialPos.x;
+       const y = initialPos.bottom ? window.innerHeight - initialPos.y : initialPos.y;
+       setPos({ x, y });
+       setHasInitialized(true);
+    }
+  }, []); // Run once on mount to set initial.
+
+  // Sync if savedPos changes externally (e.g. load game while mounted)
+  useEffect(() => {
+      if (savedPos && !dragging) {
+          setPos(savedPos);
+      }
+  }, [savedPos]);
 
   const onMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -134,14 +158,19 @@ const DraggableItem: React.FC<{
       setPos({ x: e.clientX - rel.x, y: e.clientY - rel.y });
       e.preventDefault();
     };
-    const onMouseUp = () => setDragging(false);
+    const onMouseUp = (e: MouseEvent) => {
+      setDragging(false);
+      if (onDragEnd) {
+        onDragEnd(id, { x: e.clientX - rel.x, y: e.clientY - rel.y });
+      }
+    };
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
-  }, [dragging, rel]);
+  }, [dragging, rel, id, onDragEnd]);
 
   if (!hasInitialized) return null;
 
@@ -255,12 +284,12 @@ const App: React.FC = () => {
   // Progression State
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [maxChapterReached, setMaxChapterReached] = useState(1);
-  const [maxDayReached, setMaxDayReached] = useState(0); // Index of furthest reached day
+  const [maxDayReached, setMaxDayReached] = useState(0); 
   const [activeChapter, setActiveChapter] = useState<ChapterConfig>(CHAPTERS[0]);
 
   // Tutorial State
-  const [tutorialStep, setTutorialStep] = useState<number>(-1); // -1 = No Tutorial
-  const [seenTools, setSeenTools] = useState<ToolType[]>(['hand']); // Tools the user has already seen popup for
+  const [tutorialStep, setTutorialStep] = useState<number>(-1); 
+  const [seenTools, setSeenTools] = useState<ToolType[]>(['hand']); 
   const [activeToolPopup, setActiveToolPopup] = useState<ToolType | null>(null);
   const [tutorialCompleted, setTutorialCompleted] = useState(false);
 
@@ -270,11 +299,17 @@ const App: React.FC = () => {
   const [recovered, setRecovered] = useState<Record<string, Set<string>>>({});
   const [voidedDocs, setVoidedDocs] = useState<Record<string, boolean>>({});
 
+  // Collection State
+  const [collectedSecrets, setCollectedSecrets] = useState<string[]>([]);
+  
+  // Persistence State
+  const [windowPositions, setWindowPositions] = useState<Record<string, {x: number, y: number}>>({});
+
   const [dailyScore, setDailyScore] = useState({ correct: 0, missed: 0, overRedacted: 0, totalSensitive: 0 });
   
   // Financial & Moral State
-  const [totalFunds, setTotalFunds] = useState(150); // Starting Money
-  const [moralScore, setMoralScore] = useState(0); // 0 = Neutral
+  const [totalFunds, setTotalFunds] = useState(150); 
+  const [moralScore, setMoralScore] = useState(0); 
   const [dailyFinancials, setDailyFinancials] = useState({ bribe: 0, penalty: 0, wage: 120 });
   const [purchasedUpgrades, setPurchasedUpgrades] = useState<UpgradeType[]>([]);
 
@@ -285,7 +320,7 @@ const App: React.FC = () => {
   const [dailyAuditLogs, setDailyAuditLogs] = useState<AuditLogEntry[]>([]);
 
   // Document Dragging State
-  const [docPos, setDocPos] = useState({ x: 0, y: 0 }); // Center offset
+  const [docPos, setDocPos] = useState({ x: 0, y: 0 }); 
   const [isDraggingDoc, setIsDraggingDoc] = useState(false);
   const [docDragRel, setDocDragRel] = useState({ x: 0, y: 0 });
   const [isHoveringOutbox, setIsHoveringOutbox] = useState(false);
@@ -315,7 +350,6 @@ const App: React.FC = () => {
     setIsMuted(muted);
   };
 
-  // Helper to get current chapter based on day index
   const getChapterForDay = (index: number) => {
     return CHAPTERS.find(c => index >= c.startDayIndex && index <= c.endDayIndex) || CHAPTERS[0];
   };
@@ -335,7 +369,6 @@ const App: React.FC = () => {
     const currentRedactions = redactions[currentDoc.id] || new Set();
     const unredacted = names.filter(t => !currentRedactions.has(t.id));
     
-    // Check if the only remaining unredacted item is the Special Directive Target (Bill)
     const specialTargets = currentDayConfig.specialDirective?.targetText || [];
     const isOnlySpecialLeft = unredacted.length > 0 && unredacted.every(t => 
         specialTargets.some(target => t.text.includes(target))
@@ -360,7 +393,9 @@ const App: React.FC = () => {
       maxChapterReached: overrides?.maxChapterReached ?? maxChapterReached,
       maxDayReached: overrides?.maxDayReached ?? maxDayReached,
       seenTools: overrides?.seenTools ?? seenTools,
-      tutorialCompleted: overrides?.tutorialCompleted ?? tutorialCompleted
+      tutorialCompleted: overrides?.tutorialCompleted ?? tutorialCompleted,
+      collectedSecrets: overrides?.collectedSecrets ?? collectedSecrets,
+      windowPositions: overrides?.windowPositions ?? windowPositions
     };
     localStorage.setItem('redacted_save', JSON.stringify(save));
   };
@@ -375,11 +410,18 @@ const App: React.FC = () => {
       setPurchasedUpgrades(save.purchasedUpgrades);
       setSeenTools(save.seenTools || ['hand']);
       setTutorialCompleted(save.tutorialCompleted || false);
+      setCollectedSecrets(save.collectedSecrets || []);
+      setWindowPositions(save.windowPositions || {});
       
       const currentChap = getChapterForDay(save.dayIndex);
       setMaxDayReached(Math.max(save.maxDayReached || 0, save.dayIndex));
       setMaxChapterReached(Math.max(save.maxChapterReached || 1, currentChap.number));
       setActiveChapter(currentChap);
+      
+      // Load saved doc position if available
+      if (save.windowPositions?.['document']) {
+         setDocPos(save.windowPositions['document']);
+      }
       
       return true;
     }
@@ -400,6 +442,8 @@ const App: React.FC = () => {
     setMaxChapterReached(1);
     setMaxDayReached(0);
     setActiveChapter(CHAPTERS[0]);
+    setCollectedSecrets([]);
+    setWindowPositions({});
     setPhase('CHAPTER_INTRO');
     saveGame({ 
       dayIndex: 0, 
@@ -409,7 +453,9 @@ const App: React.FC = () => {
       maxChapterReached: 1, 
       maxDayReached: 0, 
       seenTools: ['hand'], 
-      tutorialCompleted: false 
+      tutorialCompleted: false,
+      collectedSecrets: [],
+      windowPositions: {}
     });
   };
 
@@ -443,7 +489,6 @@ const App: React.FC = () => {
     setIsDirectiveBurned(false);
   };
   
-  // Calculate dynamic expenses based on day
   const calculateExpenses = () => {
     const dayNum = dayIndex + 1;
     const rentDue = dayNum % 3 === 0;
@@ -467,10 +512,13 @@ const App: React.FC = () => {
     return base;
   }, [currentDayConfig, purchasedUpgrades]);
 
-  // Initialize Doc Position to Center on load/new doc
   useEffect(() => {
-    setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); 
-  }, [currentDocIndex, phase, purchasedUpgrades, currentDoc]);
+    if (windowPositions['document']) {
+       setDocPos(windowPositions['document']);
+    } else {
+       setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 }); 
+    }
+  }, [phase]);
 
   const handleStartDay = () => {
     audio.playStamp();
@@ -566,6 +614,12 @@ const App: React.FC = () => {
     }
   };
 
+  const handleWindowDragEnd = (id: string, pos: { x: number, y: number }) => {
+    const newPositions = { ...windowPositions, [id]: pos };
+    setWindowPositions(newPositions);
+    saveGame({ windowPositions: newPositions });
+  };
+
   const handleDocMouseDown = (e: React.MouseEvent) => {
     if (currentTool !== 'hand' || e.button !== 0) return;
     audio.playPaperRustle();
@@ -597,6 +651,19 @@ const App: React.FC = () => {
     setActiveSayings(prev => prev.filter(s => s.id !== id));
   };
 
+  const handleCollectSecret = (text: string, e: React.MouseEvent) => {
+    if (collectedSecrets.includes(text)) return;
+    
+    audio.playScribble();
+    const newSecrets = [...collectedSecrets, text];
+    setCollectedSecrets(newSecrets);
+    saveGame({ collectedSecrets: newSecrets });
+    
+    // Trigger Visual Feedback
+    const id = sayingIdCounter.current++;
+    setActiveSayings(prev => [...prev, { id, x: e.clientX, y: e.clientY, text: "SECRET LOGGED", type: 'uv' }]);
+  };
+
   useEffect(() => {
     if (!isDraggingDoc) return;
 
@@ -623,12 +690,18 @@ const App: React.FC = () => {
       }
     };
 
-    const onMouseUp = () => {
+    const onMouseUp = (e: MouseEvent) => {
       setIsDraggingDoc(false);
       if (isHoveringOutbox) {
         submitCurrentDoc();
         setIsHoveringOutbox(false);
         setDocPos({ x: window.innerWidth / 2 - 425, y: window.innerHeight / 2 - 550 });
+      } else {
+        // Save document position on drop
+        handleWindowDragEnd('document', { 
+           x: e.clientX - docDragRel.x, 
+           y: e.clientY - docDragRel.y 
+        });
       }
     };
 
@@ -727,7 +800,6 @@ const App: React.FC = () => {
     }
   };
 
-  // --- Auto-Submit Logic ---
   useEffect(() => {
     if (!purchasedUpgrades.includes('auto_submit') || phase !== 'WORK' || !currentDoc) return;
 
@@ -768,7 +840,7 @@ const App: React.FC = () => {
       saveGame({ tutorialCompleted: true });
     }
 
-    const { stats, mistakes, financials, moralChange } = result;
+    const { stats, mistakes, financials, moralChange, uvBonus } = result;
 
     setDailyScore(prev => ({
       correct: prev.correct + stats.correct,
@@ -779,7 +851,7 @@ const App: React.FC = () => {
 
     setDailyFinancials(prev => ({
        ...prev,
-       bribe: prev.bribe + financials.bribeEarned,
+       bribe: prev.bribe + financials.bribeEarned + uvBonus,
        penalty: prev.penalty + financials.penaltyIncurred
     }));
 
@@ -795,7 +867,9 @@ const App: React.FC = () => {
     ]);
 
     let newCitation: Citation | null = null;
-    if (financials.bribeEarned > 0) {
+    if (uvBonus > 0) {
+       newCitation = { type: 'PERFECT', message: 'HIDDEN INTEL SECURED', amount: uvBonus };
+    } else if (financials.bribeEarned > 0) {
       newCitation = { type: 'BRIBE', message: 'DIRECTIVE COMPLIANCE', amount: financials.bribeEarned };
     } else if (financials.penaltyIncurred > 0) {
       newCitation = { type: 'PENALTY', message: 'INSUBORDINATION FINE', amount: financials.penaltyIncurred };
@@ -965,7 +1039,13 @@ const App: React.FC = () => {
                  />
               ))}
 
-              <DraggableItem initialPos={{ x: 50, y: 50 }} onDragStart={() => audio.playPaperRustle()}>
+              <DraggableItem 
+                 id="shift_log"
+                 initialPos={{ x: 50, y: 50 }} 
+                 savedPos={windowPositions['shift_log']}
+                 onDragEnd={handleWindowDragEnd}
+                 onDragStart={() => audio.playPaperRustle()}
+              >
                  <div className="bg-[#1c1917] border border-yellow-600/50 text-stone-300 p-4 w-64 shadow-lg font-tech cursor-pointer backdrop-blur-md bg-opacity-90">
                     <div className="font-bold text-sm uppercase border-b border-stone-700 pb-1 mb-2 flex justify-between text-yellow-500">
                       <span>SHIFT_LOG: Day {currentDayConfig.day}</span>
@@ -978,14 +1058,19 @@ const App: React.FC = () => {
                       <span>CREDITS: {totalFunds}</span>
                       {totalFunds < 20 && <span className="text-red-500 animate-pulse">LOW FUNDS!</span>}
                     </div>
-                    {/* ADDED HINT */}
                     <div className="mt-3 pt-2 border-t border-stone-800 text-[10px] text-stone-300 text-center uppercase tracking-widest font-sans opacity-80">
                       (You can drag me around the screen)
                     </div>
                  </div>
               </DraggableItem>
 
-              <DraggableItem initialPos={{ x: 50, y: 250 }} onDragStart={() => audio.playPaperRustle()}>
+              <DraggableItem 
+                 id="protocol"
+                 initialPos={{ x: 50, y: 250 }} 
+                 savedPos={windowPositions['protocol']}
+                 onDragEnd={handleWindowDragEnd}
+                 onDragStart={() => audio.playPaperRustle()}
+              >
                  <div className="bg-[#1c1917] border border-stone-600 p-0 rounded shadow-2xl relative w-64 cursor-pointer overflow-hidden flex flex-col">
                    <div className="bg-stone-800 px-2 py-1 flex items-center gap-2 border-b border-stone-600">
                       <div className="w-2 h-2 rounded-full bg-red-500"></div>
@@ -1000,19 +1085,17 @@ const App: React.FC = () => {
                      <ul className="space-y-3 list-none pl-0 flex-1">
                         {currentDayConfig.rules.map((r, i) => (
                           <li key={i} className={`flex items-start gap-2 ${r.action === 'highlight' ? 'text-blue-400' : r.action === 'recover' ? 'text-green-400' : 'text-red-400'}`}>
-                            <span>></span>
+                            <span>&gt;</span>
                             {r.description}
                           </li>
                         ))}
                      </ul>
-                     {/* ADDED HINT */}
                      <div className="mt-4 pt-2 border-t border-stone-800 text-[10px] text-stone-300 text-center uppercase tracking-widest font-sans opacity-80">
                        (You can drag me around the screen)
                      </div>
                    </div>
                  </div>
                  
-                 {/* Step 0: Protocol Tutorial - MOVED OUTSIDE OF OVERFLOW-HIDDEN DIV */}
                  {tutorialStep === 0 && (
                     <div className="absolute -right-4 top-10 translate-x-full z-[100]">
                        <TutorialNote 
@@ -1024,14 +1107,32 @@ const App: React.FC = () => {
                  )}
               </DraggableItem>
 
+              {/* THE NOTEBOOK - Always visible but draggable */}
+              {purchasedUpgrades.includes('uv') && (
+                 <DraggableItem 
+                    id="notebook"
+                    initialPos={{ x: 350, y: 50 }} 
+                    savedPos={windowPositions['notebook']}
+                    onDragEnd={handleWindowDragEnd}
+                    onDragStart={() => audio.playPaperRustle()}
+                 >
+                   <Notebook secrets={collectedSecrets} />
+                 </DraggableItem>
+              )}
+
               {currentDayConfig.specialDirective && !isDirectiveBurned && (
-                 <DraggableItem initialPos={{ x: window.innerWidth - 300, y: 350 }} onDragStart={() => audio.playPaperRustle()}>
+                 <DraggableItem 
+                    id="directive_note"
+                    initialPos={{ x: window.innerWidth - 300, y: 350 }} 
+                    savedPos={windowPositions['directive_note']}
+                    onDragEnd={handleWindowDragEnd}
+                    onDragStart={() => audio.playPaperRustle()}
+                 >
                    <BurnableDirective 
                       directive={currentDayConfig.specialDirective}
                       onBurnComplete={handleBurnDirective} 
                    />
                    
-                   {/* Step 1: Envelope Intro */}
                    {tutorialStep === 1 && (
                       <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
                         <TutorialNote
@@ -1042,7 +1143,6 @@ const App: React.FC = () => {
                       </div>
                    )}
                    
-                   {/* Step 5: Burn Envelope */}
                    {tutorialStep === 5 && (
                       <div className="absolute top-1/2 -left-4 -translate-x-full -translate-y-1/2 z-[100]">
                         <TutorialNote
@@ -1074,8 +1174,10 @@ const App: React.FC = () => {
                      highlightedIds={highlights[currentDoc.id] || new Set()} 
                      recoveredIds={recovered[currentDoc.id] || new Set()}
                      isVoided={voidedDocs[currentDoc.id] || false}
+                     collectedSecrets={collectedSecrets}
                      onToggleTokens={handleToggleTokens} 
                      onRedactAll={handleRedactAll} 
+                     onCollectSecret={handleCollectSecret}
                      tool={currentTool}
                      tutorialStep={tutorialStep}
                      style={{ 
@@ -1086,7 +1188,6 @@ const App: React.FC = () => {
                      onMouseDown={handleDocMouseDown}
                    />
                    
-                   {/* Step 3: Redaction Tutorial */}
                    {tutorialStep === 3 && (
                       <div 
                          className="absolute z-[100] pointer-events-none transition-transform duration-75" 
@@ -1106,7 +1207,6 @@ const App: React.FC = () => {
                  </>
               )}
 
-              {/* Upload Zone (Outbox) */}
               <div 
                 ref={outboxRef}
                 className={`absolute right-10 bottom-32 w-64 h-32 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center z-[55] rounded
@@ -1124,7 +1224,6 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Step 6: Outbox Tutorial */}
               {tutorialStep === 6 && (
                  <div className="absolute right-80 bottom-40 z-[100]">
                     <TutorialNote
@@ -1134,8 +1233,7 @@ const App: React.FC = () => {
                  </div>
               )}
               
-              {/* Application Dock (Toolbar) */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#0a0c10] px-4 py-2 rounded-lg shadow-2xl border border-stone-800 flex gap-2 z-[60]">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#0a0c10] px-4 py-1 rounded-lg shadow-2xl border border-stone-800 flex gap-2 z-[60]">
                  {availableTools.map(t => (
                     <button 
                       key={t} 
@@ -1164,7 +1262,6 @@ const App: React.FC = () => {
                         {t === 'analyzer' && <Microscope size={20} />}
                       </div>
                       
-                      {/* Tooltip */}
                       <span className="absolute -top-10 text-[9px] uppercase font-bold text-stone-300 tracking-widest bg-black px-2 py-1 rounded border border-stone-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                         {t === 'omni' ? 'MASTER_KEY' : t}
                       </span>
@@ -1172,7 +1269,6 @@ const App: React.FC = () => {
                  ))}
               </div>
 
-              {/* Step 2: Toolbox Tutorial */}
               {tutorialStep === 2 && (
                  <div 
                    className="absolute bottom-28 left-1/2 z-[100]" 
@@ -1186,7 +1282,6 @@ const App: React.FC = () => {
                  </div>
               )}
 
-              {/* Step 4: Select Hand Tool */}
               {tutorialStep === 4 && (
                  <div 
                    className="absolute bottom-28 left-1/2 z-[100]"

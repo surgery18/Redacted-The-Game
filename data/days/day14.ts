@@ -34,7 +34,7 @@ export const day14: DayConfig = {
     {
       id: "d14_3",
       title: "Arrest Report",
-      content: HEADER + "Suspect: {Winner R.|whistleblower}\n\nFound in possession of documents detailing {Vault 7|codename}." + FOOTER
+      content: HEADER + "Suspect: {Winner R.|whistleblower||PLANTED}\n\nFound in possession of documents detailing {Vault 7|codename}." + FOOTER
     }
   ],
   feed: { headline: "TRAITORS CAUGHT", body: "Dissidents detained." }
