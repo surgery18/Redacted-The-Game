@@ -1,248 +1,350 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Redacted</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;800&family=Special+Elite&family=Share+Tech+Mono&display=swap');
-      
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #050505; 
-        color: #e7e5e4; 
-        overflow: hidden;
-        user-select: none;
-        margin: 0;
-        padding: 0;
-      }
-      
-      /* --- Monitor & CRT Effects --- */
-      .monitor-screen {
-        width: 100vw;
-        height: 100vh;
-        position: relative;
-        overflow: hidden;
-        background-color: #0a0c10;
-        box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
-      }
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Redacted</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;800&family=Special+Elite&family=Share+Tech+Mono&display=swap");
 
-      .crt-scanlines {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          to bottom,
-          rgba(255,255,255,0),
-          rgba(255,255,255,0) 50%,
-          rgba(0,0,0,0.1) 50%,
-          rgba(0,0,0,0.1)
-        );
-        background-size: 100% 4px;
-        pointer-events: none;
-        z-index: 999;
-        opacity: 0.6;
-      }
-      
-      .crt-vignette {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
-        pointer-events: none;
-        z-index: 1000;
-        mix-blend-mode: multiply;
-      }
+			body {
+				font-family: "Inter", sans-serif;
+				background-color: #050505;
+				color: #e7e5e4;
+				overflow: hidden;
+				user-select: none;
+				margin: 0;
+				padding: 0;
+			}
 
-      .crt-flicker {
-        animation: flicker 0.15s infinite;
-      }
+			/* --- Monitor & CRT Effects --- */
+			.monitor-screen {
+				width: 100vw;
+				height: 100vh;
+				position: relative;
+				overflow: hidden;
+				background-color: #0a0c10;
+				box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+			}
 
-      @keyframes flicker {
-        0% { opacity: 0.97; }
-        50% { opacity: 0.95; }
-        100% { opacity: 0.98; }
-      }
+			.crt-scanlines {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					to bottom,
+					rgba(255, 255, 255, 0),
+					rgba(255, 255, 255, 0) 50%,
+					rgba(0, 0, 0, 0.1) 50%,
+					rgba(0, 0, 0, 0.1)
+				);
+				background-size: 100% 4px;
+				pointer-events: none;
+				z-index: 999;
+				opacity: 0.6;
+			}
 
-      .bg-digital-grid {
-        background-size: 40px 40px;
-        background-image:
-          linear-gradient(to right, rgba(50, 100, 200, 0.03) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(50, 100, 200, 0.03) 1px, transparent 1px);
-      }
+			.crt-vignette {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.7);
+				pointer-events: none;
+				z-index: 1000;
+				mix-blend-mode: multiply;
+			}
 
-      /* Fonts */
-      .font-typewriter { font-family: 'Courier Prime', monospace; }
-      .font-stamp { font-family: 'Special Elite', cursive; }
-      .font-tech { font-family: 'Share Tech Mono', monospace; }
+			.crt-flicker {
+				animation: flicker 0.15s infinite;
+			}
 
-      /* Animations */
-      @keyframes slide-up {
-        from { transform: translateY(100%); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .animate-slide-up {
-        animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
+			@keyframes flicker {
+				0% {
+					opacity: 0.97;
+				}
+				50% {
+					opacity: 0.95;
+				}
+				100% {
+					opacity: 0.98;
+				}
+			}
 
-      @keyframes stamp-slam {
-        0% { transform: scale(3) rotate(-10deg); opacity: 0; }
-        70% { transform: scale(0.9) rotate(2deg); opacity: 1; }
-        100% { transform: scale(1) rotate(0deg); opacity: 1; }
-      }
-      .stamp-effect {
-        animation: stamp-slam 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-      }
-      
-      @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      .animate-fade-in {
-        animation: fade-in 0.5s ease-out forwards;
-      }
+			.bg-digital-grid {
+				background-size: 40px 40px;
+				background-image: linear-gradient(
+						to right,
+						rgba(50, 100, 200, 0.03) 1px,
+						transparent 1px
+					),
+					linear-gradient(
+						to bottom,
+						rgba(50, 100, 200, 0.03) 1px,
+						transparent 1px
+					);
+			}
 
-      @keyframes redaction-wipe {
-        0% { clip-path: inset(0 100% 0 0); opacity: 1; }
-        100% { clip-path: inset(0 0 0 0); opacity: 1; }
-      }
-      .redaction-bar-anim {
-        animation: redaction-wipe 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      }
+			/* Fonts */
+			.font-typewriter {
+				font-family: "Courier Prime", monospace;
+			}
+			.font-stamp {
+				font-family: "Special Elite", cursive;
+			}
+			.font-tech {
+				font-family: "Share Tech Mono", monospace;
+			}
 
-      .noise-overlay {
-        position: absolute;
-        inset: 0;
-        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYUN+y7KAAAAGXRSTlNCGNm2Hn4D9J0N95/t2K1e/X6L/P3Lg58AAABhSURBVDjL7ZbbDoAgCEPdP6H//+mKixxN6jT7N6tU811E7e3Vvj48Gj04zV6lB/XmR7vj00wM/1O7B/qR08c/3O+h/2s2F/2s2F/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/w1/33xQ0pLAAAAAElFTkSuQmCC'); 
-        opacity: 0.05;
-        pointer-events: none;
-        mix-blend-mode: overlay;
-      }
+			/* Animations */
+			@keyframes slide-up {
+				from {
+					transform: translateY(100%);
+					opacity: 0;
+				}
+				to {
+					transform: translateY(0);
+					opacity: 1;
+				}
+			}
+			.animate-slide-up {
+				animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+			}
 
-      .document-ruled-paper {
-        background-image: linear-gradient(#f4f1ea 19px, #d4d0c8 20px);
-        background-size: 100% 20px;
-      }
+			@keyframes stamp-slam {
+				0% {
+					transform: scale(3) rotate(-10deg);
+					opacity: 0;
+				}
+				70% {
+					transform: scale(0.9) rotate(2deg);
+					opacity: 1;
+				}
+				100% {
+					transform: scale(1) rotate(0deg);
+					opacity: 1;
+				}
+			}
+			.stamp-effect {
+				animation: stamp-slam 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+			}
 
-      /* --- Burning Effect Animations --- */
-      @keyframes burn-consume {
-        0% { clip-path: inset(0 0 0 0); filter: brightness(1); }
-        30% { filter: brightness(0.8) sepia(0.5) saturate(2); }
-        100% { clip-path: inset(0 0 100% 0); filter: brightness(0) grayscale(1); }
-      }
-      
-      @keyframes burn-rise {
-        0% { top: 100%; opacity: 0; }
-        5% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { top: -20%; opacity: 0; }
-      }
+			@keyframes fade-in {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+			.animate-fade-in {
+				animation: fade-in 0.5s ease-out forwards;
+			}
 
-      @keyframes smoke-rise {
-        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0; }
-        20% { opacity: 0.6; }
-        100% { transform: translateY(-100px) scale(2) rotate(45deg); opacity: 0; }
-      }
+			@keyframes redaction-wipe {
+				0% {
+					clip-path: inset(0 100% 0 0);
+					opacity: 1;
+				}
+				100% {
+					clip-path: inset(0 0 0 0);
+					opacity: 1;
+				}
+			}
+			.redaction-bar-anim {
+				animation: redaction-wipe 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+			}
 
-      @keyframes spark-fly {
-        0% { transform: translate(0, 0); opacity: 1; }
-        100% { transform: translate(var(--dx), -100px); opacity: 0; }
-      }
+			.noise-overlay {
+				position: absolute;
+				inset: 0;
+				background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYUN+y7KAAAAGXRSTlNCGNm2Hn4D9J0N95/t2K1e/X6L/P3Lg58AAABhSURBVDjL7ZbbDoAgCEPdP6H//+mKixxN6jT7N6tU811E7e3Vvj48Gj04zV6lB/XmR7vj00wM/1O7B/qR08c/3O+h/2s2F/2s2F/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/z2+w/yv2B+w/w1/33xQ0pLAAAAAElFTkSuQmCC");
+				opacity: 0.05;
+				pointer-events: none;
+				mix-blend-mode: overlay;
+			}
 
-      @keyframes fire-flicker {
-        0% { transform: scaleY(1) skewX(0deg); }
-        25% { transform: scaleY(1.1) skewX(-2deg); }
-        50% { transform: scaleY(0.9) skewX(2deg); }
-        75% { transform: scaleY(1.05) skewX(-1deg); }
-        100% { transform: scaleY(1) skewX(0deg); }
-      }
+			.document-ruled-paper {
+				background-image: linear-gradient(#f4f1ea 19px, #d4d0c8 20px);
+				background-size: 100% 20px;
+			}
 
-      .burning-mask {
-        animation: burn-consume 2s linear forwards;
-        transform-origin: bottom;
-      }
+			/* --- Burning Effect Animations --- */
+			@keyframes burn-consume {
+				0% {
+					clip-path: inset(0 0 0 0);
+					filter: brightness(1);
+				}
+				30% {
+					filter: brightness(0.8) sepia(0.5) saturate(2);
+				}
+				100% {
+					clip-path: inset(0 0 100% 0);
+					filter: brightness(0) grayscale(1);
+				}
+			}
 
-      .fire-container {
-        position: absolute;
-        left: -10%;
-        width: 120%;
-        height: 60px;
-        z-index: 60;
-        pointer-events: none;
-        top: 100%;
-        transform: translateY(-50%);
-        opacity: 0;
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-      }
+			@keyframes burn-rise {
+				0% {
+					top: 100%;
+					opacity: 0;
+				}
+				5% {
+					opacity: 1;
+				}
+				90% {
+					opacity: 1;
+				}
+				100% {
+					top: -20%;
+					opacity: 0;
+				}
+			}
 
-      .burning .fire-container {
-        animation: burn-rise 2s linear forwards;
-      }
+			@keyframes smoke-rise {
+				0% {
+					transform: translateY(0) scale(1) rotate(0deg);
+					opacity: 0;
+				}
+				20% {
+					opacity: 0.6;
+				}
+				100% {
+					transform: translateY(-100px) scale(2) rotate(45deg);
+					opacity: 0;
+				}
+			}
 
-      .fire-flames {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to top, #ff4500 0%, #ffcc00 50%, transparent 100%);
-        filter: blur(3px) contrast(1.5) drop-shadow(0 0 10px #ff4500);
-        mix-blend-mode: screen;
-        animation: fire-flicker 0.1s infinite;
-        transform-origin: bottom;
-        border-radius: 50% 50% 0 0;
-      }
+			@keyframes spark-fly {
+				0% {
+					transform: translate(0, 0);
+					opacity: 1;
+				}
+				100% {
+					transform: translate(var(--dx), -100px);
+					opacity: 0;
+				}
+			}
 
-      .smoke {
-        position: absolute;
-        width: 15px;
-        height: 15px;
-        background: rgba(80, 80, 80, 0.6);
-        border-radius: 50%;
-        filter: blur(5px);
-        animation: smoke-rise 1.5s ease-out forwards;
-      }
+			@keyframes fire-flicker {
+				0% {
+					transform: scaleY(1) skewX(0deg);
+				}
+				25% {
+					transform: scaleY(1.1) skewX(-2deg);
+				}
+				50% {
+					transform: scaleY(0.9) skewX(2deg);
+				}
+				75% {
+					transform: scaleY(1.05) skewX(-1deg);
+				}
+				100% {
+					transform: scaleY(1) skewX(0deg);
+				}
+			}
 
-      .spark {
-        position: absolute;
-        width: 2px;
-        height: 2px;
-        background: #fff;
-        box-shadow: 0 0 4px #ffcc00;
-        border-radius: 50%;
-        animation: spark-fly 1s ease-out forwards;
-      }
+			.burning-mask {
+				animation: burn-consume 2s linear forwards;
+				transform-origin: bottom;
+			}
 
-      .shake {
-        animation: shake-anim 0.2s cubic-bezier(.36,.07,.19,.97) both;
-      }
+			.fire-container {
+				position: absolute;
+				left: -10%;
+				width: 120%;
+				height: 60px;
+				z-index: 60;
+				pointer-events: none;
+				top: 100%;
+				transform: translateY(-50%);
+				opacity: 0;
+				display: flex;
+				justify-content: center;
+				align-items: flex-end;
+			}
 
-      @keyframes shake-anim {
-        10%, 90% { transform: translate3d(-1px, 0, 0); }
-        20%, 80% { transform: translate3d(2px, 0, 0); }
-        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-        40%, 60% { transform: translate3d(4px, 0, 0); }
-      }
+			.burning .fire-container {
+				animation: burn-rise 2s linear forwards;
+			}
 
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3"
-  }
-}
-</script>
-</head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+			.fire-flames {
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					to top,
+					#ff4500 0%,
+					#ffcc00 50%,
+					transparent 100%
+				);
+				filter: blur(3px) contrast(1.5) drop-shadow(0 0 10px #ff4500);
+				mix-blend-mode: screen;
+				animation: fire-flicker 0.1s infinite;
+				transform-origin: bottom;
+				border-radius: 50% 50% 0 0;
+			}
+
+			.smoke {
+				position: absolute;
+				width: 15px;
+				height: 15px;
+				background: rgba(80, 80, 80, 0.6);
+				border-radius: 50%;
+				filter: blur(5px);
+				animation: smoke-rise 1.5s ease-out forwards;
+			}
+
+			.spark {
+				position: absolute;
+				width: 2px;
+				height: 2px;
+				background: #fff;
+				box-shadow: 0 0 4px #ffcc00;
+				border-radius: 50%;
+				animation: spark-fly 1s ease-out forwards;
+			}
+
+			.shake {
+				animation: shake-anim 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+			}
+
+			@keyframes shake-anim {
+				10%,
+				90% {
+					transform: translate3d(-1px, 0, 0);
+				}
+				20%,
+				80% {
+					transform: translate3d(2px, 0, 0);
+				}
+				30%,
+				50%,
+				70% {
+					transform: translate3d(-4px, 0, 0);
+				}
+				40%,
+				60% {
+					transform: translate3d(4px, 0, 0);
+				}
+			}
+		</style>
+		<script type="importmap">
+			{
+				"imports": {
+					"lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+					"react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+					"react/": "https://esm.sh/react@^19.2.3/",
+					"react": "https://esm.sh/react@^19.2.3"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="./index.tsx"></script>
+	</body>
 </html>
